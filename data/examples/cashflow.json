@@ -1,0 +1,79 @@
+{
+  "module": "cashflow",
+  "meta": {
+    "asOf": "2026-11-01",
+    "source": "示例数据",
+    "status": "example",
+    "confidence": "example",
+    "updatedBy": "示例生成器",
+    "confirmedBy": null,
+    "reviewAfter": "2026-12-01"
+  },
+  "owner": "Alex（虚构）",
+  "currency": "USD",
+  "period": "2026-11",
+  "incomeTotal": {
+    "value": 10000,
+    "unit": "USD",
+    "asOf": "2026-11-01",
+    "source": "示例数据"
+  },
+  "expenseTotal": {
+    "value": 6000,
+    "unit": "USD",
+    "asOf": "2026-11-01",
+    "source": "示例数据"
+  },
+  "netCashflow": {
+    "value": 4000,
+    "unit": "USD",
+    "asOf": "2026-11-01",
+    "source": "示例数据"
+  },
+  "entries": [
+    {
+      "label": "虚构工资收入",
+      "kind": "income",
+      "amount": {
+        "value": 8000,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "note": "用户自述的示例槽位"
+    },
+    {
+      "label": "虚构其他收入",
+      "kind": "income",
+      "amount": {
+        "value": 2000,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "note": "示例"
+    },
+    {
+      "label": "日常生活",
+      "kind": "expense",
+      "amount": {
+        "value": 4000,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "note": "示例"
+    },
+    {
+      "label": "居住与交通",
+      "kind": "expense",
+      "amount": {
+        "value": 2000,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "note": "示例"
+    }
+  ]
+}

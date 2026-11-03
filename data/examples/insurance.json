@@ -1,0 +1,77 @@
+{
+  "module": "insurance",
+  "meta": {
+    "asOf": "2026-11-01",
+    "source": "示例数据",
+    "status": "example",
+    "confidence": "example",
+    "updatedBy": "示例生成器",
+    "confirmedBy": null,
+    "reviewAfter": "2027-02-01"
+  },
+  "owner": "Alex（虚构）",
+  "currency": "USD",
+  "annualPremium": {
+    "value": 2000,
+    "unit": "USD",
+    "asOf": "2026-11-01",
+    "source": "示例数据"
+  },
+  "coverageTotal": {
+    "value": 500000,
+    "unit": "USD",
+    "asOf": "2026-11-01",
+    "source": "示例数据"
+  },
+  "policyCount": {
+    "value": 2,
+    "unit": "份",
+    "asOf": "2026-11-01",
+    "source": "示例数据"
+  },
+  "note": "保额展示仅用于目录核对，不代表可叠加赔付。",
+  "policies": [
+    {
+      "name": "虚构保障计划 A",
+      "insured": "Alex（虚构）",
+      "provider": "虚构保险机构",
+      "policyIdMasked": "P***0001",
+      "coverage": {
+        "value": 300000,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "annualPremium": {
+        "value": 1000,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "renewalDate": "2027-11-01",
+      "state": "有效（示例）",
+      "note": "条款须由用户核对"
+    },
+    {
+      "name": "虚构保障计划 B",
+      "insured": "Alex（虚构）",
+      "provider": "虚构保险机构",
+      "policyIdMasked": "P***0002",
+      "coverage": {
+        "value": 200000,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "annualPremium": {
+        "value": 1000,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "renewalDate": "2027-11-01",
+      "state": "有效（示例）",
+      "note": "示例不构成保障建议"
+    }
+  ]
+}

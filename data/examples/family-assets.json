@@ -1,0 +1,70 @@
+{
+  "module": "family-assets",
+  "meta": {
+    "asOf": "2026-11-01",
+    "source": "示例数据",
+    "status": "example",
+    "confidence": "example",
+    "updatedBy": "示例生成器",
+    "confirmedBy": null,
+    "reviewAfter": "2027-02-01"
+  },
+  "owner": "Alex（虚构）",
+  "currency": "USD",
+  "grossAssets": {
+    "value": 800000,
+    "unit": "USD",
+    "asOf": "2026-11-01",
+    "source": "示例数据"
+  },
+  "liabilitiesTotal": {
+    "value": 200000,
+    "unit": "USD",
+    "asOf": "2026-11-01",
+    "source": "示例数据"
+  },
+  "netAssets": {
+    "value": 600000,
+    "unit": "USD",
+    "asOf": "2026-11-01",
+    "source": "示例数据"
+  },
+  "assets": [
+    {
+      "name": "虚构住宅",
+      "category": "不动产",
+      "owner": "Alex（虚构）",
+      "value": {
+        "value": 600000,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "note": "圆整虚构估值"
+    },
+    {
+      "name": "虚构家庭储备",
+      "category": "金融资产",
+      "owner": "Alex（虚构）",
+      "value": {
+        "value": 200000,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "note": "与投资模块口径独立，禁止跨模块直接相加"
+    }
+  ],
+  "liabilities": [
+    {
+      "name": "虚构房屋贷款",
+      "balance": {
+        "value": 200000,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "note": "不含账号或抵押文件"
+    }
+  ]
+}

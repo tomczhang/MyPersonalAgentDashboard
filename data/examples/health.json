@@ -1,0 +1,67 @@
+{
+  "module": "health",
+  "meta": {
+    "asOf": "2026-11-01",
+    "source": "示例数据",
+    "status": "example",
+    "confidence": "example",
+    "updatedBy": "示例生成器",
+    "confirmedBy": null,
+    "reviewAfter": "2026-11-02"
+  },
+  "owner": "Alex（虚构）",
+  "steps": {
+    "value": 8000,
+    "unit": "步",
+    "asOf": "2026-11-01",
+    "source": "示例数据"
+  },
+  "sleepHours": {
+    "value": 8,
+    "unit": "小时",
+    "asOf": "2026-11-01",
+    "source": "示例数据"
+  },
+  "activeMinutes": {
+    "value": 40,
+    "unit": "分钟",
+    "asOf": "2026-11-01",
+    "source": "示例数据"
+  },
+  "note": "仅用于记录设备摘要，不作诊断或健康建议。",
+  "records": [
+    {
+      "label": "每日步数",
+      "measurement": {
+        "value": 8000,
+        "unit": "步",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "device": "虚构设备",
+      "note": "虚构活动记录"
+    },
+    {
+      "label": "睡眠时长",
+      "measurement": {
+        "value": 8,
+        "unit": "小时",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "device": "虚构设备",
+      "note": "虚构睡眠记录"
+    },
+    {
+      "label": "活动时长",
+      "measurement": {
+        "value": 40,
+        "unit": "分钟",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "device": "虚构设备",
+      "note": "虚构活动记录"
+    }
+  ]
+}

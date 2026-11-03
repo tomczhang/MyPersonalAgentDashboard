@@ -1,0 +1,576 @@
+{
+  "module": "investment",
+  "meta": {
+    "asOf": "2026-11-01",
+    "source": "示例数据",
+    "status": "example",
+    "confidence": "example",
+    "updatedBy": "示例生成器",
+    "confirmedBy": null,
+    "reviewAfter": "2026-11-08"
+  },
+  "owner": "Alex（虚构）",
+  "currency": "USD",
+  "managedAssets": {
+    "value": 500000,
+    "unit": "USD",
+    "asOf": "2026-11-01",
+    "source": "示例数据"
+  },
+  "fx": {
+    "pair": "USD/CNY",
+    "rate": {
+      "value": 7,
+      "unit": "CNY/USD",
+      "asOf": "2026-11-01",
+      "source": "示例数据"
+    }
+  },
+  "cashTiers": [
+    {
+      "tier": "即时可用",
+      "location": "虚构现金账户 U***0001",
+      "amount": {
+        "value": 40000,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "accountId": "U***0001",
+      "bucket": "机会桶",
+      "inFramework": true
+    },
+    {
+      "tier": "短期储备",
+      "location": "虚构储备账户 U***0002",
+      "amount": {
+        "value": 40000,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "accountId": "U***0002",
+      "bucket": "机会桶",
+      "inFramework": true
+    },
+    {
+      "tier": "策略备用",
+      "location": "虚构证券主账户 U***0001 · 策略备用",
+      "amount": {
+        "value": 20000,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "accountId": "U***0001",
+      "bucket": "机会桶",
+      "inFramework": true
+    }
+  ],
+  "ammunitionTotal": {
+    "value": 100000,
+    "unit": "USD",
+    "asOf": "2026-11-01",
+    "source": "示例数据"
+  },
+  "accounts": [
+    {
+      "name": "虚构证券主账户",
+      "idMasked": "U***0001",
+      "nav": {
+        "value": 300000,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "dataDate": "2026-11-01",
+      "confidence": "example"
+    },
+    {
+      "name": "虚构证券副账户",
+      "idMasked": "U***0002",
+      "nav": {
+        "value": 200000,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "dataDate": "2026-11-01",
+      "confidence": "example"
+    }
+  ],
+  "holdings": [
+    {
+      "symbol": "DEMO-A",
+      "qty": {
+        "value": 1000,
+        "unit": "股",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "markPrice": {
+        "value": 150,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "valueUsd": {
+        "value": 150000,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "note": "虚构资产；不对应真实证券。"
+    },
+    {
+      "symbol": "DEMO-B",
+      "qty": {
+        "value": 1000,
+        "unit": "股",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "markPrice": {
+        "value": 90,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "valueUsd": {
+        "value": 90000,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "note": "虚构资产；不对应真实证券。"
+    },
+    {
+      "symbol": "DEMO-C",
+      "qty": {
+        "value": 1000,
+        "unit": "股",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "markPrice": {
+        "value": 110,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "valueUsd": {
+        "value": 110000,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "note": "虚构资产；不对应真实证券。"
+    },
+    {
+      "symbol": "DEMO-D",
+      "qty": {
+        "value": 1000,
+        "unit": "股",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "markPrice": {
+        "value": 50,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "valueUsd": {
+        "value": 50000,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "note": "虚构资产；不对应真实证券。"
+    }
+  ],
+  "independentAccounts": [
+    {
+      "name": "独立观察账户（虚构）",
+      "idMasked": "U***0009",
+      "nav": {
+        "value": 20000,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "dataDate": "2026-11-01",
+      "confidence": "example",
+      "includedInManagedAssets": false,
+      "note": "独立展示，不计入受管资产及三桶比例。"
+    }
+  ],
+  "framework": {
+    "note": "三桶目标比 3:4:3 是虚构示例。现金已归入机会桶，单列现金仅作交叉观察，不与三桶相加；框架外观察持仓占总值 10%，独立账户不计入。",
+    "cashTargetRatio": {
+      "value": 0.2,
+      "unit": "ratio",
+      "asOf": "2026-11-01",
+      "source": "示例数据"
+    },
+    "cashActualRatio": {
+      "value": 0.2,
+      "unit": "ratio",
+      "asOf": "2026-11-01",
+      "source": "示例数据"
+    },
+    "cashGap": {
+      "value": 0,
+      "unit": "USD",
+      "asOf": "2026-11-01",
+      "source": "示例数据"
+    },
+    "buckets": [
+      {
+        "name": "防守桶",
+        "targetWeight": {
+          "value": 3,
+          "unit": "weight",
+          "asOf": "2026-11-01",
+          "source": "示例数据"
+        },
+        "targetRatio": {
+          "value": 0.3,
+          "unit": "ratio",
+          "asOf": "2026-11-01",
+          "source": "示例数据"
+        },
+        "actualRatio": {
+          "value": 0.3,
+          "unit": "ratio",
+          "asOf": "2026-11-01",
+          "source": "示例数据"
+        },
+        "amount": {
+          "value": 150000,
+          "unit": "USD",
+          "asOf": "2026-11-01",
+          "source": "示例数据"
+        },
+        "gap": {
+          "value": 0.0,
+          "unit": "USD",
+          "asOf": "2026-11-01",
+          "source": "示例数据"
+        }
+      },
+      {
+        "name": "成长桶",
+        "targetWeight": {
+          "value": 4,
+          "unit": "weight",
+          "asOf": "2026-11-01",
+          "source": "示例数据"
+        },
+        "targetRatio": {
+          "value": 0.4,
+          "unit": "ratio",
+          "asOf": "2026-11-01",
+          "source": "示例数据"
+        },
+        "actualRatio": {
+          "value": 0.4,
+          "unit": "ratio",
+          "asOf": "2026-11-01",
+          "source": "示例数据"
+        },
+        "amount": {
+          "value": 200000,
+          "unit": "USD",
+          "asOf": "2026-11-01",
+          "source": "示例数据"
+        },
+        "gap": {
+          "value": 0.0,
+          "unit": "USD",
+          "asOf": "2026-11-01",
+          "source": "示例数据"
+        }
+      },
+      {
+        "name": "机会桶",
+        "targetWeight": {
+          "value": 3,
+          "unit": "weight",
+          "asOf": "2026-11-01",
+          "source": "示例数据"
+        },
+        "targetRatio": {
+          "value": 0.3,
+          "unit": "ratio",
+          "asOf": "2026-11-01",
+          "source": "示例数据"
+        },
+        "actualRatio": {
+          "value": 0.2,
+          "unit": "ratio",
+          "asOf": "2026-11-01",
+          "source": "示例数据"
+        },
+        "amount": {
+          "value": 100000,
+          "unit": "USD",
+          "asOf": "2026-11-01",
+          "source": "示例数据"
+        },
+        "gap": {
+          "value": 50000.0,
+          "unit": "USD",
+          "asOf": "2026-11-01",
+          "source": "示例数据"
+        }
+      }
+    ]
+  },
+  "positions": [
+    {
+      "symbol": "DEMO-A",
+      "name": "虚构稳健资产",
+      "qty": {
+        "value": 1000,
+        "unit": "股",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "markPrice": {
+        "value": 150,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "valueUsd": {
+        "value": 150000,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "note": "虚构资产；不对应真实证券。",
+      "accountId": "U***0001",
+      "inFramework": true,
+      "pnlAmount": 30000,
+      "pnlPct": 25,
+      "costCaliber": "diluted-breakeven",
+      "bucket": "防守桶"
+    },
+    {
+      "symbol": "DEMO-B",
+      "name": "虚构成长资产",
+      "qty": {
+        "value": 1000,
+        "unit": "股",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "markPrice": {
+        "value": 90,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "valueUsd": {
+        "value": 90000,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "note": "虚构资产；不对应真实证券。",
+      "accountId": "U***0001",
+      "inFramework": true,
+      "pnlAmount": -10000,
+      "pnlPct": -10,
+      "costCaliber": "diluted-breakeven",
+      "bucket": "成长桶"
+    },
+    {
+      "symbol": "DEMO-C",
+      "name": "虚构创新资产",
+      "qty": {
+        "value": 1000,
+        "unit": "股",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "markPrice": {
+        "value": 110,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "valueUsd": {
+        "value": 110000,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "note": "虚构资产；不对应真实证券。",
+      "accountId": "U***0002",
+      "inFramework": true,
+      "pnlAmount": 10000,
+      "pnlPct": 10,
+      "costCaliber": "diluted-breakeven",
+      "bucket": "成长桶"
+    },
+    {
+      "symbol": "DEMO-D",
+      "name": "虚构观察资产",
+      "qty": {
+        "value": 1000,
+        "unit": "股",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "markPrice": {
+        "value": 50,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "valueUsd": {
+        "value": 50000,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "note": "虚构资产；不对应真实证券。",
+      "accountId": "U***0002",
+      "inFramework": false,
+      "pnlAmount": 0,
+      "pnlPct": 0,
+      "costCaliber": "diluted-breakeven"
+    }
+  ],
+  "ammo": [
+    {
+      "tier": "即时可用",
+      "location": "虚构现金账户 U***0001",
+      "amount": {
+        "value": 40000,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "accountId": "U***0001",
+      "bucket": "机会桶",
+      "inFramework": true
+    },
+    {
+      "tier": "短期储备",
+      "location": "虚构储备账户 U***0002",
+      "amount": {
+        "value": 40000,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "accountId": "U***0002",
+      "bucket": "机会桶",
+      "inFramework": true
+    },
+    {
+      "tier": "策略备用",
+      "location": "虚构证券主账户 U***0001 · 策略备用",
+      "amount": {
+        "value": 20000,
+        "unit": "USD",
+        "asOf": "2026-11-01",
+        "source": "示例数据"
+      },
+      "accountId": "U***0001",
+      "bucket": "机会桶",
+      "inFramework": true
+    }
+  ],
+  "series": [
+    {
+      "date": "2025-11-01",
+      "value": 400000
+    },
+    {
+      "date": "2025-12-01",
+      "value": 410000
+    },
+    {
+      "date": "2026-01-01",
+      "value": 420000
+    },
+    {
+      "date": "2026-02-01",
+      "value": 430000
+    },
+    {
+      "date": "2026-03-01",
+      "value": 420000
+    },
+    {
+      "date": "2026-04-01",
+      "value": 440000
+    },
+    {
+      "date": "2026-05-01",
+      "value": 450000
+    },
+    {
+      "date": "2026-06-01",
+      "value": 440000
+    },
+    {
+      "date": "2026-07-01",
+      "value": 460000
+    },
+    {
+      "date": "2026-08-01",
+      "value": 470000
+    },
+    {
+      "date": "2026-09-01",
+      "value": 480000
+    },
+    {
+      "date": "2026-10-01",
+      "value": 490000
+    },
+    {
+      "date": "2026-11-01",
+      "value": 500000
+    }
+  ],
+  "performanceByYear": {
+    "2025": {
+      "investedCapital": 350000,
+      "priceGain": 30000,
+      "dividends": 10000,
+      "realized": 5000,
+      "costs": -5000,
+      "totalReturn": 40000,
+      "twrPct": 10
+    },
+    "2026": {
+      "investedCapital": 400000,
+      "priceGain": 30000,
+      "dividends": 10000,
+      "realized": 5000,
+      "costs": -5000,
+      "totalReturn": 40000,
+      "twrPct": 10
+    }
+  },
+  "dividends": {
+    "totalReceived": 20000,
+    "yieldTtmPct": 2,
+    "byYear": [
+      {
+        "year": 2025,
+        "amount": 10000
+      },
+      {
+        "year": 2026,
+        "amount": 10000
+      }
+    ]
+  }
+}

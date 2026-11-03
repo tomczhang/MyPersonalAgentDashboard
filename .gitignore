@@ -1,0 +1,17 @@
+node_modules/
+.mcp.json
+.npm-cache/
+dist/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+playwright-report/
+test-results/
+*.local
+
+# Real user data: everything ignored except the public placeholder.
+data/local/
+!data/local/
+data/local/*
+!data/local/README.md
