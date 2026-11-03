@@ -23,8 +23,8 @@ function WatchlistCard({ item }: { item: WatchlistItem }) {
     display: {
       label: <bdi dir="ltr">{money(node.price)}</bdi>,
       value: node.shares === undefined ? '—' : <><bdi dir="ltr">{node.shares.toLocaleString('en-US')}</bdi> 股</>,
-      share: <Badge className={cx('gap-1 rounded-full px-2', node.status !== 'pending' && 'bg-badge-new-background text-badge-new-text')}>
-        {node.status === 'triggered' && <span aria-hidden>✓</span>}{statuses[node.status]}
+      share: <Badge role={node.status === 'triggered' ? 'img' : undefined} aria-label={node.status === 'triggered' ? statuses.triggered : undefined} className={cx('gap-1 rounded-full px-2', node.status !== 'pending' && 'bg-badge-new-background text-badge-new-text')}>
+        {node.status === 'triggered' ? <span aria-hidden>✓</span> : statuses[node.status]}
       </Badge>,
     },
   }));
@@ -37,9 +37,8 @@ function WatchlistCard({ item }: { item: WatchlistItem }) {
       presentation={{
         title: <span className="flex min-w-0 flex-col gap-1">
           <span className="flex flex-wrap items-center gap-1.5"><bdi className="text-text-primary">{item.name}</bdi><Badge className={cx('rounded-full px-2', directions[item.direction])}>{item.direction}</Badge></span>
-          <bdi dir="ltr" className="text-caption-1-medium text-text-primary/65">{item.symbol}</bdi>
         </span>,
-        readout: <span className="flex flex-col text-end text-caption-1-medium"><span>已触发 {summary.triggeredCount}</span><span>共 {summary.total} 级</span></span>,
+        readout: <span className="text-caption-1-medium">已触发 {summary.triggeredCount}/{summary.total}</span>,
         breakdownLabel: `${item.symbol} 触发梯子`,
         showFreeSpace: false,
         limitsTitle: null,
