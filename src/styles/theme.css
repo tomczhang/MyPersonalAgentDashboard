@@ -44,7 +44,7 @@
   --color-accent-900: var(--color-blue-900);
   --color-accent-950: var(--color-blue-950);
 
-  /* BoardUI Chinese font stack; Google Fonts is loaded by index.html. */
+  /* BoardUI Chinese font stack; Fontsource files are bundled by main.tsx. */
   --font-sans: "Noto Sans SC", "Noto Sans SC Fallback", "Inter", "Inter Fallback", sans-serif;
   /* Explicit Latin/code/number runs use Inter; Chinese still falls back to Noto. */
   --font-latin: "Inter", "Inter Fallback", "Noto Sans SC", "Noto Sans SC Fallback", sans-serif;

@@ -26,6 +26,8 @@ import { cx } from "@/utils/cx";
  */
 
 export type ContextSegment = {
+  /** Stable identity when display labels (for example prices) repeat. */
+  id?: string;
   label: string;
   tokens: number;
   /** Any CSS colour; defaults to the chart palette by index (blue first). */
@@ -33,7 +35,7 @@ export type ContextSegment = {
   /** Deferred buckets are listed but neither drawn in the bar nor counted. */
   deferred?: boolean;
   /** Optional display values; bar geometry continues to use tokens. */
-  display?: { value: ReactNode; share: ReactNode; description?: ReactNode };
+  display?: { label?: ReactNode; value: ReactNode; share: ReactNode };
 };
 
 export type ContextGroup = {
@@ -43,7 +45,7 @@ export type ContextGroup = {
 };
 
 export type UsageLimit = {
-  label: string;
+  label: ReactNode;
   /** 0-1 share of the limit already used. */
   used: number | null;
   /** "Resets in 2 hr 46 min", "Resets Tue 3:00 PM"… */
@@ -218,7 +220,7 @@ export function AgentLimitsCard({
         {context.segments.map((s, i) =>
           s.deferred ? null : (
             <div
-              key={s.label}
+              key={s.id ?? s.label}
               className="h-full shrink-0 transition-[width] duration-500 ease-out"
               style={{ width: `${share(s.tokens)}%`, flex: context.equalSegments ? 1 : undefined, backgroundColor: tones[i].color }}
               title={s.display ? undefined : `${s.label} · ${formatTokens(s.tokens)}`}
@@ -246,16 +248,14 @@ export function AgentLimitsCard({
           >
             <div className="flex flex-col pt-3">
               {context.segments.map((s, i) => (
-                <div key={s.label} className="flex items-center gap-2 py-[5px]">
+                <div key={s.id ?? s.label} className="flex items-center gap-2 py-[5px]">
                   <span
                     className="size-2.5 shrink-0 rounded-[3px]"
                     style={{ backgroundColor: s.deferred ? "var(--color-chart-cursor)" : tones[i].color }}
                   />
-                  <span className="min-w-0 flex-1 truncate text-body-regular text-text-primary">{s.label}
-                    {s.display?.description && <span className="block whitespace-normal break-words text-caption-1-regular text-text-tertiary">{s.display.description}</span>}
-                  </span>
-                  <span className="text-body-regular text-text-tertiary tabular-nums">{s.display?.value ?? formatTokens(s.tokens)}</span>
-                  <span className="w-14 text-end text-body-medium text-text-primary tabular-nums">
+                  <span className="min-w-0 flex-1 truncate text-body-regular text-text-primary">{s.display?.label ?? s.label}</span>
+                  <span className="shrink-0 whitespace-nowrap text-body-regular text-text-tertiary tabular-nums">{s.display?.value ?? formatTokens(s.tokens)}</span>
+                  <span className={cx("shrink-0 text-end text-body-medium text-text-primary tabular-nums", s.display ? "min-w-16" : "w-14")}>
                     {s.deferred ? "—" : s.display?.share ?? `${share(s.tokens).toFixed(1)}%`}
                   </span>
                 </div>
@@ -333,7 +333,7 @@ export function AgentLimitsCard({
       {/* ------------------------------------------------- plan limits */}
       <div className="my-3 h-px w-full bg-separator-border-strong" />
 
-      <div className="flex items-center justify-between gap-3 py-1">
+      {presentation?.limitsTitle !== null && <div className="flex items-center justify-between gap-3 py-1">
         <span className="text-body-medium text-text-secondary">
           {presentation?.limitsTitle ?? <>Plan usage limits{plan ? ` · ${plan}` : ""}</>}
         </span>
@@ -346,15 +346,15 @@ export function AgentLimitsCard({
             <RiArrowRightLine className="size-4 rtl:rotate-180" aria-hidden />
           </a>
         )}
-      </div>
+      </div>}
 
       <div className="flex flex-col gap-3 pt-1">
-        {limits.map((limit) => {
+        {limits.map((limit, index) => {
           const pct = Math.round(Math.max(0, Math.min(1, limit.used ?? 0)) * 100);
           return (
-            <div key={limit.label} className="flex flex-col gap-1.5">
+            <div key={index} className="flex flex-col gap-1.5">
               <div className="flex items-baseline justify-between gap-3">
-                <span className="min-w-0 truncate text-body-medium text-text-primary">{limit.label}</span>
+                <span className={cx("min-w-0 text-body-medium text-text-primary", typeof limit.label === "string" && "truncate")}>{limit.label}</span>
                 <span className="flex shrink-0 items-baseline gap-2">
                   <span className="text-body-regular text-text-tertiary">{limit.resets}</span>
                   <span className="w-9 text-end text-body-medium text-text-primary tabular-nums">{limit.used === null ? "—" : `${pct}%`}</span>

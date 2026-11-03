@@ -1,14 +1,30 @@
 import { describe, expect, it } from 'vitest';
 import example from '../../data/examples/investment.json';
 import { parseModule } from '@/data/schema';
-import { levelLabel, watchlistSummary } from '@/data/investment-watchlist';
+import { watchlistLevelColor, watchlistSummary } from '@/data/investment-watchlist';
 
 const items = parseModule('investment', example).watchlist!;
 describe('watchlist stages and interval progress', () => {
+  it('accepts optional whole planned shares, preserves zero, and rejects retired notes', () => {
+    const withNode = (node: object) => parseModule('investment', { ...example, watchlist: [{ ...items[0], levels: [node] }] });
+    const base = { level: 1, price: 140, status: 'triggered' };
+    expect(withNode(base).watchlist![0].levels[0].shares).toBeUndefined();
+    for (const shares of [0, 1000]) expect(withNode({ ...base, shares }).watchlist![0].levels[0].shares).toBe(shares);
+    for (const shares of [-1, 0.5, Infinity, NaN, '1000', null]) expect(() => withNode({ ...base, shares })).toThrow();
+    expect(() => withNode({ ...base, note: '已移除的虚构备注' })).toThrow();
+  });
+  it('uses increasing chart depth without cycling, with distinct next and pending colors', () => {
+    const colors = Array.from({ length: 12 }, (_, i) => watchlistLevelColor('triggered', i, 12));
+    expect(new Set(colors).size).toBe(12);
+    const depths = colors.map(color => Number(color.match(/\) ([\d.]+)%/)![1]));
+    expect(depths.every((depth, index) => index === 0 || depth > depths[index - 1])).toBe(true);
+    expect(watchlistLevelColor('triggered', 0, 1)).not.toContain('NaN');
+    expect(watchlistLevelColor('next', 2, 4)).toBe('var(--color-accent-600)');
+    expect(watchlistLevelColor('pending', 3, 4)).toBe('var(--color-chart-track)');
+  });
   it('counts supplied stages instead of treating the highest level as a count', () => {
     expect(items.map(item => watchlistSummary(item).triggeredCount)).toEqual([2, 1, 0, 3]);
     expect(watchlistSummary(items[3])).toMatchObject({ next: undefined, progress: null, allTriggered: true });
-    expect(levelLabel(12)).toBe('12级');
     const sparse = { ...items[0], levels: [{ level: 1, price: 100, status: 'triggered' as const }, { level: 5, price: 150, status: 'triggered' as const }] };
     expect(watchlistSummary(sparse)).toMatchObject({ triggeredCount: 2, total: 2, allTriggered: true });
   });

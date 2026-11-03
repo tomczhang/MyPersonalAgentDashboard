@@ -1,9 +1,13 @@
 import type { Investment } from '@/data/investment-view';
 
 export type WatchlistItem = NonNullable<Investment['watchlist']>[number];
-export function levelLabel(level: number) {
-  const numerals = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
-  return `${numerals[level - 1] ?? level}级`;
+// A single chart hue grows in depth by ordinal position, never by trade direction.
+// Mix semantic tokens so the same ramp also follows the enclosing theme surface.
+export function watchlistLevelColor(status: WatchlistItem['levels'][number]['status'], index: number, total: number) {
+  if (status === 'next') return 'var(--color-accent-600)';
+  if (status === 'pending') return 'var(--color-chart-track)';
+  const depth = total > 1 ? index / (total - 1) : 0;
+  return `color-mix(in oklab, var(--color-chart-1-active) ${40 + depth * 60}%, var(--color-background-primary-default))`;
 }
 
 // Presentation only: supplied statuses remain authoritative, including when the

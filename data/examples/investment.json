@@ -608,25 +608,25 @@
           "level": 1,
           "price": 140,
           "status": "triggered",
-          "note": "虚构阈值，仅作展示。"
+          "shares": 1000
         },
         {
           "level": 2,
           "price": 150,
           "status": "triggered",
-          "note": "虚构分级观察节点。"
+          "shares": 2000
         },
         {
           "level": 3,
           "price": 160,
           "status": "next",
-          "note": "虚构分级观察节点。"
+          "shares": 3000
         },
         {
           "level": 4,
           "price": 180,
           "status": "pending",
-          "note": "虚构分级观察节点。"
+          "shares": 4000
         }
       ]
     },
@@ -640,19 +640,19 @@
           "level": 1,
           "price": 100,
           "status": "triggered",
-          "note": "虚构阈值，仅作展示。"
+          "shares": 1000
         },
         {
           "level": 2,
           "price": 90,
           "status": "next",
-          "note": "虚构分级观察节点。"
+          "shares": 2000
         },
         {
           "level": 3,
           "price": 80,
           "status": "pending",
-          "note": "虚构分级观察节点。"
+          "shares": 3000
         }
       ]
     },
@@ -666,31 +666,31 @@
           "level": 1,
           "price": 110,
           "status": "next",
-          "note": "虚构阈值，仅作展示。"
+          "shares": 1000
         },
         {
           "level": 2,
           "price": 100,
           "status": "pending",
-          "note": "虚构分级观察节点。"
+          "shares": 2000
         },
         {
           "level": 3,
           "price": 90,
           "status": "pending",
-          "note": "虚构分级观察节点。"
+          "shares": 3000
         },
         {
           "level": 4,
           "price": 80,
           "status": "pending",
-          "note": "虚构分级观察节点。"
+          "shares": 4000
         },
         {
           "level": 5,
           "price": 70,
           "status": "pending",
-          "note": "虚构分级观察节点。"
+          "shares": 5000
         }
       ]
     },
@@ -704,19 +704,19 @@
           "level": 1,
           "price": 70,
           "status": "triggered",
-          "note": "虚构阈值，仅作展示。"
+          "shares": 1000
         },
         {
           "level": 2,
           "price": 60,
           "status": "triggered",
-          "note": "虚构分级观察节点。"
+          "shares": 2000
         },
         {
           "level": 3,
           "price": 50,
           "status": "triggered",
-          "note": "虚构分级观察节点。"
+          "shares": 3000
         }
       ]
     }

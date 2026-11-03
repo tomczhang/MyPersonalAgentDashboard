@@ -43,7 +43,7 @@ const watchlistItem = z.object({
   referencePrice: z.number().finite().nonnegative(),
   levels: z.array(z.object({
     level: z.number().int().positive(), price: z.number().finite().nonnegative(),
-    status: z.enum(['triggered', 'next', 'pending']), note: text.optional(),
+    status: z.enum(['triggered', 'next', 'pending']), shares: z.number().int().nonnegative().optional(),
   }).strict()).min(1),
 }).strict().superRefine((item, ctx) => {
   if (item.levels.some((node, i) => i > 0 && node.level <= item.levels[i - 1].level)) {

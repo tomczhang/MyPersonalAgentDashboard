@@ -48,8 +48,24 @@ for (const width of [1440, 390]) {
       await expect(cards(page).first()).toHaveAttribute('aria-expanded', 'true');
       const controlId = await cards(page).first().getAttribute('aria-controls');
       await expect(ladder(page)).toHaveAttribute('id', controlId!);
-      for (const label of ['一级', '二级', '三级', '四级', '已触发', '下一个', '待触发', '虚构阈值，仅作展示。', 'US$180.00']) await expect(ladder(page)).toContainText(label);
-      await expect(ladder(page).locator('bdi[dir="ltr"]')).toHaveCount(4);
+      for (const label of ['已触发', '下一个', '待触发', 'US$180.00', '1,000 股']) await expect(ladder(page)).toContainText(label);
+      await expect(ladder(page)).not.toContainText(/一级|二级|三级|四级|虚构阈值|虚构分级观察节点/);
+      const rows = ladder(page).locator(':scope > div > div');
+      await expect(rows).toHaveCount(4);
+      for (const [index, node] of example.watchlist[0].levels.entries()) {
+        const columns = rows.nth(index).locator(':scope > span');
+        await expect(columns).toHaveCount(4);
+        await expect(columns.nth(1)).toHaveText(`US$${node.price.toFixed(2)}`);
+        await expect(columns.nth(2)).toHaveText(`${node.shares.toLocaleString('en-US')} 股`);
+        const badge = columns.nth(3).locator(':scope > span');
+        await expect(badge).toHaveClass(/rounded-full/);
+        await expect(badge).toHaveClass(node.status === 'pending' ? /bg-badge-neutral-background/ : /bg-badge-new-background/);
+        await expect(badge.locator('[aria-hidden]')).toHaveCount(node.status === 'triggered' ? 1 : 0);
+        if (node.status === 'triggered') await expect(badge).toContainText('✓');
+        const color = await segments.nth(index).evaluate(node => getComputedStyle(node).backgroundColor);
+        await expect(columns.first()).toHaveCSS('background-color', color);
+      }
+      await expect(cards(page).first().locator('xpath=..')).toContainText('下一节点 US$160.00 · 参考价 US$150.00');
       await expect(ladder(page)).toHaveCSS('opacity', '1');
       await expect(ladder(page)).toHaveCSS('filter', 'none');
       await page.mouse.move(0, 0);
@@ -72,15 +88,31 @@ test('keyboard Enter and Space toggle the same native button without hover toolt
   await expect(cards(page).nth(1)).toBeFocused();
   await expect(page.getByRole('tooltip')).toHaveCount(0);
   await page.keyboard.press('Enter');
-  await expect(ladder(page, 'DEMO-E').locator('bdi[dir="ltr"]')).toHaveCount(3);
+  await expect(ladder(page, 'DEMO-E').locator(':scope > div > div')).toHaveCount(3);
   await page.keyboard.press('Space');
   await expect(ladder(page, 'DEMO-E')).toHaveCount(0);
   await page.keyboard.press('Tab');
   await page.keyboard.press('Space');
   await expect(cards(page).nth(2)).toHaveAttribute('aria-expanded', 'true');
-  await expect(ladder(page, 'DEMO-C').locator('bdi[dir="ltr"]')).toHaveCount(5);
+  await expect(ladder(page, 'DEMO-C').locator(':scope > div > div')).toHaveCount(5);
   await page.keyboard.press('Enter');
   await expect(cards(page).nth(2)).toHaveAttribute('aria-expanded', 'false');
+});
+
+test('missing shares display a dash, zero stays visible, and equal prices keep distinct rows', async ({ page }) => {
+  const fixture = JSON.parse(JSON.stringify(example).replaceAll('示例数据', '虚构浏览器测试'));
+  delete fixture.watchlist[0].levels[0].shares;
+  fixture.watchlist[0].levels[1].shares = 0;
+  fixture.watchlist[0].levels[1].price = fixture.watchlist[0].levels[0].price;
+  await page.route('**/api/data/investment', route => route.fulfill({ json: { origin: 'local', data: { ...fixture, meta: { ...fixture.meta, status: 'draft' } } } }));
+  await page.goto('/#investment');
+  await cards(page).first().click();
+  const rows = ladder(page).locator(':scope > div > div');
+  await expect(rows).toHaveCount(4);
+  await expect(rows.nth(0).locator(':scope > span').nth(2)).toHaveText('—');
+  await expect(rows.nth(1).locator(':scope > span').nth(2)).toHaveText('0 股');
+  await expect(rows.nth(0)).toContainText('US$140.00');
+  await expect(rows.nth(1)).toContainText('US$140.00');
 });
 
 test('missing and empty watchlists hide the whole panel', async ({ page }) => {
