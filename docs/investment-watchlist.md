@@ -33,17 +33,18 @@
 ```
 
 - `watchlist` 可选；缺失或空数组时整块隐藏。旧 `alerts` 字段仍被严格 schema 拒绝。
-- 每只标的至少一个节点；`level` 为正整数、唯一且升序，只用于内部排序与深度定位；价格有限且非负。
+- 每只标的至少一个节点；`level` 为正整数、唯一且升序，只用于内部排序与稳定标识；渐变位置按当前梯子的节点序号定位；价格有限且非负。
 - `shares` 可选，为非负整数；`1000` 显示「1,000 股」，`0` 显示「0 股」，缺失显示「—」。这些示例股数均为虚构计划数量，不参与进度计算。节点 `note` 已移除；严格 schema 会拒绝带有旧字段的数据，填充方须移除该字段。
 - 状态依次为 `triggered`、`next`、`pending`，至多一个 `next`。不根据参考价重新判断历史触发状态。
 - 头部显示名称、方向徽标；标题同行右侧、展开箭头之前以 caption 显示「已触发 X/Y」。X 为已触发节点数量，不是最高级别编号。`symbol` 保留在槽位与内部标识中，不再展示代码行。
-- 分段条按节点等宽：已触发使用单一 `chart-7` emerald 色相，与当前语义表面混色，按绝对 `level` 取 40% / 60% / 80% / 100% 四档，第四级及以后复用最深档。色阶不随梯子总长度、已触发数量或买卖方向变化。下一个使用 accent，待触发使用中性轨道。分段与行首色块使用同一函数，分段间隙从可用宽度扣除，不截掉末段。
+- 完成条以 `chart-track` 为全宽底轨，上覆全宽 emerald 连续渐变，按「已触发级数 / 总级数」用 `clip-path: inset()` 裁去右侧未完成部分。50% 完成时只露出完整渐变的左半段，渐变不会压缩进填充宽度。细刻度叠在填充上方，按节点数量等距定位；下一节点不再使用蓝色段。
+- 渐变浅端为 `chart-7` 40% 与 `text-white` 的 Oklab 混色，深端为 `chart-7-active`；两种主题均保持左浅右深。`watchlistGradientColor(position)` 与 CSS 渐变共用 Oklab 插值；调用层按 `(index + 0.5) / N` 计算已触发行首色块。next / pending 均用轨道灰，不取渐变色。没有分档色表，也没有第四级封顶。
 - 展开行按「色块 / 触发价 / 计划股数 / 状态徽标」排列，不显示级别名称及备注。已触发复用 BoardUI Badge，以 `chart-7/20` 浅绿底和 `calendar-event-emerald-title` 主题适配绿系文字色显示 ✓，无障碍名称仍为「已触发」；下一个与待触发保留文字和原中性徽标。相同价格仍以唯一 level 标识不同节点。
 - 方向徽标使用 chart-1 / chart-3 / chart-4，位于名称旁。
 
 ## 下一节点进度
 
-收起态保留头部、分段条及下一节点进度。底部左标签为「下一节点 US$160.00 · 参考价 US$150.00」，允许窄屏换行，右侧百分比与下方进度条保留。
+收起态保留头部、完成条及下一节点进度。底部左标签为「下一节点 US$160.00 · 参考价 US$150.00」，允许窄屏换行，右侧百分比与下方进度条保留。
 
 以上一已触发节点的价格为起点：
 
@@ -61,11 +62,11 @@
 
 1. `presentation.title` / `readout` / `limitsTitle`：注入头部与底部文案；`limitsTitle: null` 省略底部额外标题；`showFreeSpace` 隐藏与梯子无关的空余用量行。
 2. `ContextSegment.display`：可选 `label` 提供隔离的 LTR 价格，原数值列和百分比列映射为股数、状态徽标，移除备注接口。可选 `id` 保持相同价格节点的稳定标识。自定义状态列允许徽标自然宽度；没有 display 时仍显示原 token / 百分比，`deferred` 仍优先显示「—」。
-3. `context.equalSegments`：为级别语义提供等宽段布局；默认仍按 tokens / max 比例绘制。
+3. `context.completion`：可选 `used`（0–1）、`gradient` 与无障碍 `label`，启用全宽渐变裁切及等距刻度；观察名单由调用层传入完成比例与渐变。不传时仍按 tokens / max 绘制原分段条，原 `equalSegments` 接口保留。
 4. `UsageLimit.used` 允许 `null`，未知进度显示「—」和空轨道，不伪装成 0%；`label` 支持 ReactNode 以隔离 LTR 金额。
 5. `presentation.breakdownLabel` 加上 `useId` 生成的 `aria-controls`，为展开区提供可访问名称与按钮关联。
 
-外观调整均在调用层：沿用 `className` 接口设置 1px 边框、`rounded-3xl`、16px 内边距以及语义文字色。原组件分段条、明细行列、分隔线、底部单色条、展开箭头和 motion 动画保留。没有重写组件外壳，也没有新增 hover tooltip。
+外观调整均在调用层：沿用 `className` 接口设置 1px 边框、`rounded-3xl`、16px 内边距以及语义文字色。第十七单通过可选接口将观察名单分段条改为渐变完成条；明细行列、分隔线、底部单色条、展开箭头和 motion 动画保留。没有重写组件外壳，也没有新增 hover tooltip。
 
 桌面点击、手机 tap、键盘 Enter / Space 使用同一个原生按钮；再次操作收起。聚焦或悬停不会展开。无内部垂直滚动区。
 
@@ -102,4 +103,14 @@
 - 1440px、deviceScaleFactor=1 浅色 / 深色全展开态截图已自查；附加虚构八级梯子覆盖四档绿阶与第四级以后的封顶，分段与行首色块一致。最浅档可辨；色块和分段内没有叠字，✓ 对比度浅色约 6.15:1、深色约 8.05:1，均超过 4.5:1。
 - 截图：`test-results/watchlist-emerald-1440-{example,four-bands}-{light,dark}.png`；颜色与对比度实测：`test-results/watchlist-emerald-audit.json`。
 - `rg` 扫描第一方文件及构建文本，共 101 个文件，凭据模式与已配置密钥均无命中；业务源码 / 公开示例 / 测试的常见真实证券标识及未掩码身份模式无命中，12 个投资 symbol 均为 DEMO 标识。未读取本地真实数据，记录为 `test-results/watchlist-emerald-scan.json`。
+- 未 commit / push。
+
+## 第十七单验收（2026-11-03）
+
+- 完成条采用全宽 `chart-7` 色系连续渐变，由已触发数量 / 总级数裁切；边界以 1px 刻度叠在填充和轨道上。行首标记按节点中点采样同一渐变，next / pending 均为轨道灰。卡头读数、价格 / 股数行式、二元徽标、底部区间进度和槽位推导保持不变。
+- `npm run build`、29 项单元测试、构建产物上的 17 项 Playwright 测试全部通过；`git diff --check` 通过。构建保留既有 Vite 配置导入扩展名及大 chunk 提示。
+- 1440px、deviceScaleFactor=1、100% 缩放的浅色 / 深色全展开态已自查：渐变连续且均为左浅右深，填充与轨道上的刻度可辨，未完成色块为灰色。390px、键盘、缺失股数与零值、同价节点、空名单回归通过。
+- 附加虚构稀疏级号梯子覆盖 4/8、8/8、0/8 和 1/1。像素比对：半完成与全完成条的左半段完全一致；已触发行首色与对应渐变中点的 RGB 单通道最大误差为 1（8-bit 量化），未触发行首为轨道色。八级全完成条检测到 182 个不同渐变颜色，不再按四档封顶；两种主题均通过。
+- 截图：`test-results/watchlist-gradient-1440-{example,normalized}-{light,dark}.png`；几何与颜色记录：`test-results/watchlist-gradient-audit.json`；像素比对：`test-results/watchlist-gradient-pixels.json`。
+- `rg` 扫描 98 个第一方文件 / 构建文本的凭据模式及 28 个业务源码 / 公开示例 / 测试文件的常见真实证券与未掩码身份模式，无命中；可用的已配置密钥精确扫描无命中。投资示例的 12 个 symbol 均为 DEMO 标识。未读取本地真实数据；记录：`test-results/watchlist-gradient-scan.json`。
 - 未 commit / push。

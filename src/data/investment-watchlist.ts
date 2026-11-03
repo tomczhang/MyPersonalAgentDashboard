@@ -1,13 +1,20 @@
 import type { Investment } from '@/data/investment-view';
 
 export type WatchlistItem = NonNullable<Investment['watchlist']>[number];
-// Fixed emerald bands follow the absolute level, independent of ladder length.
-// Mix with the semantic surface for both themes; levels 4+ share the deepest band.
-export function watchlistLevelColor(status: WatchlistItem['levels'][number]['status'], level: number) {
-  if (status === 'next') return 'var(--color-accent-600)';
-  if (status === 'pending') return 'var(--color-chart-track)';
-  const depth = [40, 60, 80, 100][Math.min(4, Math.max(1, level)) - 1];
-  return `color-mix(in oklab, var(--color-chart-7) ${depth}%, var(--color-background-primary-default))`;
+// One continuous emerald scale. The on-fill text token keeps the pale endpoint
+// light in both themes instead of reversing the gradient on a dark surface.
+export function watchlistGradientColor(position: number) {
+  const light = 'color-mix(in oklab, var(--color-chart-7) 40%, var(--color-text-white))';
+  return `color-mix(in oklab, ${light}, var(--color-chart-7-active) ${position * 100}%)`;
+}
+
+export const WATCHLIST_GRADIENT = `linear-gradient(to right in oklab, ${watchlistGradientColor(0)}, ${watchlistGradientColor(1)})`;
+
+// Position is the one-based ordinal in this ladder, not a possibly sparse level ID.
+export function watchlistLevelColor(status: WatchlistItem['levels'][number]['status'], position: number, total: number) {
+  return status === 'triggered'
+    ? watchlistGradientColor((position - 0.5) / total)
+    : 'var(--color-chart-track)';
 }
 
 // Presentation only: supplied statuses remain authoritative, including when the

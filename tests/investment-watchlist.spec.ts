@@ -35,11 +35,23 @@ for (const width of [1440, 390]) {
     await expect(panel(page)).toContainText('缺少区间');
     const boxes = await cards(page).evaluateAll(nodes => nodes.map(node => { const r = node.getBoundingClientRect(); return { x: r.x, y: r.y }; }));
     expect(boxes[0].y === boxes[1].y).toBe(width === 1440);
-    // The ordinal bar has one equal-width segment per level, even for pending levels.
-    const segments = cards(page).first().locator('xpath=..').locator(':scope > div').first().locator(':scope > div');
-    expect(await segments.count()).toBe(4);
-    const widths = await segments.evaluateAll(nodes => nodes.map(node => node.getBoundingClientRect().width));
-    expect(Math.max(...widths) - Math.min(...widths)).toBeLessThan(0.1);
+    // The full gradient always spans the track; only its clip changes with completion.
+    for (const [index, item] of example.watchlist.entries()) {
+      const bar = cards(page).nth(index).locator('xpath=..').getByRole('progressbar');
+      const count = item.levels.filter(node => node.status === 'triggered').length;
+      await expect(bar).toHaveAttribute('aria-valuenow', String(count));
+      await expect(bar).toHaveAttribute('aria-valuemax', String(item.levels.length));
+      const geometry = await bar.evaluate(node => {
+        const fill = node.querySelector('div')!;
+        return { width: node.getBoundingClientRect().width, fillWidth: fill.getBoundingClientRect().width, clip: getComputedStyle(fill).clipPath,
+          ticks: [...node.querySelectorAll('span')].map(tick => tick.getBoundingClientRect().x - node.getBoundingClientRect().x) };
+      });
+      expect(geometry.fillWidth).toBe(geometry.width);
+      const rightClip = Number(geometry.clip.match(/inset\(0px ([\d.]+)%/)![1]);
+      expect(rightClip).toBeCloseTo((1 - count / item.levels.length) * 100, 3);
+      expect(geometry.ticks).toHaveLength(item.levels.length - 1);
+      geometry.ticks.forEach((x, i) => expect(x).toBeCloseTo(geometry.width * (i + 1) / item.levels.length, 1));
+    }
     for (const theme of ['light', 'dark']) {
       if (theme === 'dark') {
         await page.getByRole('button', { name: '切换深浅主题' }).filter({ visible: true }).click();
@@ -81,7 +93,16 @@ for (const width of [1440, 390]) {
         } else {
           await expect(badge).toHaveText('待触发');
         }
-        const color = await segments.nth(index).evaluate(node => getComputedStyle(node).backgroundColor);
+        const color = await page.evaluate(({ index, triggered }) => {
+          const probe = document.createElement('span');
+          probe.style.backgroundColor = triggered
+            ? `color-mix(in oklab, color-mix(in oklab, var(--color-chart-7) 40%, var(--color-text-white)), var(--color-chart-7-active) ${(index + 0.5) / 4 * 100}%)`
+            : 'var(--color-chart-track)';
+          document.body.append(probe);
+          const color = getComputedStyle(probe).backgroundColor;
+          probe.remove();
+          return color;
+        }, { index, triggered: node.status === 'triggered' });
         await expect(columns.first()).toHaveCSS('background-color', color);
       }
       await expect(cards(page).first().locator('xpath=..')).toContainText('下一节点 US$160.00 · 参考价 US$150.00');

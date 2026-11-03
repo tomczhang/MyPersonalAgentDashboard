@@ -60,6 +60,8 @@ export interface AgentLimitsCardProps {
     groups?: ContextGroup[];
     /** Equal-width ordinal stages, independent of their displayed values. */
     equalSegments?: boolean;
+    /** Full-width gradient clipped to a 0–1 completion, with equal stage ticks. */
+    completion?: { used: number; gradient: string; label: string };
   };
   /** Presentation-only adaptation; omitted fields retain the original widget. */
   presentation?: {
@@ -216,7 +218,29 @@ export function AgentLimitsCard({
         </span>
       </button>
 
-      <Bar className="mt-1.5">
+      {context.completion ? <div
+        role="progressbar"
+        aria-label={context.completion.label}
+        aria-valuemin={0}
+        aria-valuemax={counted.length}
+        aria-valuenow={Math.round(context.completion.used * counted.length)}
+        className="relative mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-chart-track"
+      >
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            backgroundImage: context.completion.gradient,
+            clipPath: `inset(0 ${(1 - Math.max(0, Math.min(1, context.completion.used))) * 100}% 0 0)`,
+          }}
+        />
+        {counted.slice(1).map((s, i) => <span
+          key={s.id ?? s.label}
+          aria-hidden
+          className="absolute inset-y-0 w-px bg-background-secondary-default"
+          style={{ left: `${((i + 1) / counted.length) * 100}%` }}
+        />)}
+      </div> : <Bar className="mt-1.5">
         {context.segments.map((s, i) =>
           s.deferred ? null : (
             <div
@@ -228,7 +252,7 @@ export function AgentLimitsCard({
             />
           ),
         )}
-      </Bar>
+      </Bar>}
 
       <AnimatePresence initial={false}>
         {expanded && (

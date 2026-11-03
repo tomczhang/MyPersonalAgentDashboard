@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import example from '../../data/examples/investment.json';
 import { parseModule } from '@/data/schema';
-import { watchlistLevelColor, watchlistSummary } from '@/data/investment-watchlist';
+import { watchlistGradientColor, watchlistLevelColor, watchlistSummary } from '@/data/investment-watchlist';
 
 const items = parseModule('investment', example).watchlist!;
 describe('watchlist stages and interval progress', () => {
@@ -13,15 +13,14 @@ describe('watchlist stages and interval progress', () => {
     for (const shares of [-1, 0.5, Infinity, NaN, '1000', null]) expect(() => withNode({ ...base, shares })).toThrow();
     expect(() => withNode({ ...base, note: '已移除的虚构备注' })).toThrow();
   });
-  it('uses four fixed emerald bands by absolute level, with distinct next and pending colors', () => {
-    const colors = Array.from({ length: 12 }, (_, i) => watchlistLevelColor('triggered', i + 1));
-    expect(new Set(colors).size).toBe(4);
-    const depths = colors.map(color => Number(color.match(/\) ([\d.]+)%/)![1]));
-    expect(depths.slice(0, 4)).toEqual([40, 60, 80, 100]);
-    expect(colors.every(color => color.includes('--color-chart-7)'))).toBe(true);
-    expect(colors.slice(4).every(color => color === colors[3])).toBe(true);
-    expect(watchlistLevelColor('next', 3)).toBe('var(--color-accent-600)');
-    expect(watchlistLevelColor('pending', 4)).toBe('var(--color-chart-track)');
+  it('samples a continuous normalized scale without capping at the fourth stage', () => {
+    const colors = Array.from({ length: 12 }, (_, i) => watchlistLevelColor('triggered', i + 1, 12));
+    expect(new Set(colors).size).toBe(12);
+    expect(watchlistLevelColor('triggered', 1, 1)).toBe(watchlistGradientColor(0.5));
+    expect(watchlistLevelColor('triggered', 2, 4)).toBe(watchlistLevelColor('triggered', 5, 12));
+    expect(watchlistLevelColor('triggered', 2, 4)).not.toBe(watchlistLevelColor('triggered', 2, 8));
+    expect(watchlistLevelColor('next', 3, 4)).toBe('var(--color-chart-track)');
+    expect(watchlistLevelColor('pending', 4, 4)).toBe('var(--color-chart-track)');
   });
   it('counts supplied stages instead of treating the highest level as a count', () => {
     expect(items.map(item => watchlistSummary(item).triggeredCount)).toEqual([2, 1, 0, 3]);

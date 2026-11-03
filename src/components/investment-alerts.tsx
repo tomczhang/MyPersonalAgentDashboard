@@ -3,7 +3,7 @@ import { AgentLimitsCard, type ContextSegment } from '@/components/application/a
 import { Badge } from '@/components/base/badges/badge';
 import { Panel } from '@/components/module-content';
 import { money, type Investment } from '@/data/investment-view';
-import { watchlistLevelColor, watchlistSummary, type WatchlistItem } from '@/data/investment-watchlist';
+import { WATCHLIST_GRADIENT, watchlistLevelColor, watchlistSummary, type WatchlistItem } from '@/data/investment-watchlist';
 import { cx } from '@/utils/cx';
 
 const statuses = { triggered: '已触发', next: '待触发', pending: '待触发' };
@@ -15,11 +15,11 @@ const directions = {
 
 function WatchlistCard({ item }: { item: WatchlistItem }) {
   const summary = watchlistSummary(item);
-  const segments: ContextSegment[] = item.levels.map(node => ({
+  const segments: ContextSegment[] = item.levels.map((node, index) => ({
     id: String(node.level),
     label: money(node.price),
     tokens: 1,
-    color: watchlistLevelColor(node.status, node.level),
+    color: watchlistLevelColor(node.status, index + 1, summary.total),
     display: {
       label: <bdi dir="ltr">{money(node.price)}</bdi>,
       value: node.shares === undefined ? '—' : <><bdi dir="ltr">{node.shares.toLocaleString('en-US')}</bdi> 股</>,
@@ -33,7 +33,11 @@ function WatchlistCard({ item }: { item: WatchlistItem }) {
   return <li className="min-w-0 self-start">
     <AgentLimitsCard
       className="rounded-3xl border border-border-button-default [&_.text-text-tertiary]:text-text-primary/65 [&_.text-text-secondary]:text-text-primary/75 p-4"
-      context={{ max: item.levels.length, segments, equalSegments: true }}
+      context={{ max: summary.total, segments, completion: {
+        used: summary.triggeredCount / summary.total,
+        gradient: WATCHLIST_GRADIENT,
+        label: `${item.name} 节点完成度`,
+      } }}
       presentation={{
         title: <span className="flex min-w-0 flex-col gap-1">
           <span className="flex flex-wrap items-center gap-1.5"><bdi className="text-text-primary">{item.name}</bdi><Badge className={cx('rounded-full px-2', directions[item.direction])}>{item.direction}</Badge></span>
@@ -60,7 +64,7 @@ export function InvestmentAlerts({ watchlist, asOf }: { watchlist: Investment['w
       {watchlist.map((item, i) => <WatchlistCard key={`${item.symbol}:${i}`} item={item} />)}
     </ul>
     <div className="mt-4 flex flex-col gap-2 text-caption-1-regular text-text-primary/65">
-      <p>点击卡头或按 Enter / 空格展开完整梯子。各段等宽：已触发按节点顺序由浅入深、下一个为强调色、待触发为中性轨道；行首为触发价，右侧为计划股数与状态。</p>
+      <p>点击卡头或按 Enter / 空格展开完整梯子。完成度 = 已触发级数 / 总级数；绿条沿整条刻度由浅入深，未完成部分为中性轨道，刻度等距。已触发行首色块取该级中点的渐变色，待触发为轨道灰；行首为触发价，右侧为计划股数与状态。</p>
       <p>区间进度 =（参考价 − 上一已触发价）÷（下一节点价 − 上一已触发价），限制在 0–100%，买卖方向均适用。首级无已触发起点、区间价相同或未指定下一节点时显示「—」；全部已触发显示 100%。该比例仅作展示，不改变槽位触发状态。</p>
     </div>
   </Panel>;
