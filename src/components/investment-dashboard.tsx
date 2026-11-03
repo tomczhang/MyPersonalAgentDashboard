@@ -8,7 +8,7 @@ import { Select, SelectItem } from '@/components/base/select/select';
 import { Tabs, TabList, Tab, TabPanel } from '@/components/base/tabs/tabs';
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from '@/components/base/table/table';
 import { StatCards } from '@/components/application/dashboard/stat-cards';
-import { LineChartCard } from '@/components/application/dashboard/line-chart-card';
+import { InvestmentNavCard } from '@/components/investment-nav-card';
 import { EarningsChartCard } from '@/components/application/dashboard/earnings-chart-card';
 import { Panel, Provenance, Status } from '@/components/module-content';
 import { confidenceLabels } from '@/data/presentation';
@@ -93,7 +93,7 @@ export function InvestmentDashboard({ data, origin }: { data: Investment; origin
             { label: '框架缺口合计', value: money(view.gap), icon: RiPieChartLine, caption: '三桶正缺口之和；超配不抵消缺口。现金已归桶，不重复计入。' },
           ]} />
         </div>
-        <LineChartCard data={series} range={range} onRangeChange={setRange} empty={!data.series?.length} asOf={data.meta.asOf} />
+        <InvestmentNavCard data={series} summary={data.seriesSummary} range={range} onRangeChange={setRange} empty={!data.series?.length} asOf={data.meta.asOf} />
         <Panel title="持仓明细">
           <p className="mb-4 text-caption-1-medium text-text-tertiary">{scopeLabel} · {view.positions.length} 项 · 权重含现金 · 金额 USD · 截至 {data.meta.asOf}</p>
           <Table size="sm" aria-label="投资持仓明细"><TableHeader><TableColumn isRowHeader>名称 / 代码 × 股数</TableColumn><TableColumn className="hidden sm:table-cell">Buy in</TableColumn><TableColumn>市值<span className="sm:hidden"> / P/L</span></TableColumn><TableColumn className="hidden sm:table-cell">权重</TableColumn><TableColumn className="hidden sm:table-cell">现价</TableColumn><TableColumn className="hidden sm:table-cell">P/L</TableColumn></TableHeader><TableBody renderEmptyState={() => '当前视图暂无持仓'}>{view.positions.map((row, i) => <TableRow key={`${row.accountId}:${row.symbol}:${i}`} id={`${row.accountId}:${row.symbol}:${i}`}>

@@ -48,7 +48,8 @@ export const schemas = {
     // Optional extensions keep existing local slots readable. Plain amounts use currency;
     // percentages are percentage points. Their provenance is the module meta.
     positions: z.array(position).optional(), ammo: z.array(cashTier).optional(),
-    series: z.array(z.object({ date, value: z.number().nonnegative() }).strict()).optional(),
+    series: z.array(z.object({ date, value: z.number().nonnegative(), changePct: z.number().finite().optional() }).strict()).optional(),
+    seriesSummary: z.object({ changePct: z.number().finite() }).strict().optional(),
     performanceByYear: z.record(z.string().regex(/^\d{4}$/), performance).optional(),
     dividends: z.object({ totalReceived: z.number().nonnegative(), yieldTtmPct: z.number().nonnegative(), byYear: z.array(z.object({ year: z.number().int().min(1900).max(9999), amount: z.number().nonnegative() }).strict()) }).strict().optional(),
     independentAccounts: z.array(account.extend({ includedInManagedAssets: z.literal(false), note: text })),
