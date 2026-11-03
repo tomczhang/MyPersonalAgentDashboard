@@ -15,15 +15,15 @@ const directions = {
 
 function WatchlistCard({ item }: { item: WatchlistItem }) {
   const summary = watchlistSummary(item);
-  const segments: ContextSegment[] = item.levels.map((node, index) => ({
+  const segments: ContextSegment[] = item.levels.map(node => ({
     id: String(node.level),
     label: money(node.price),
     tokens: 1,
-    color: watchlistLevelColor(node.status, index, item.levels.length),
+    color: watchlistLevelColor(node.status, node.level),
     display: {
       label: <bdi dir="ltr">{money(node.price)}</bdi>,
       value: node.shares === undefined ? '—' : <><bdi dir="ltr">{node.shares.toLocaleString('en-US')}</bdi> 股</>,
-      share: <Badge role={node.status === 'triggered' ? 'img' : undefined} aria-label={node.status === 'triggered' ? statuses.triggered : undefined} className={cx('gap-1 rounded-full px-2', node.status === 'triggered' && 'bg-badge-new-background text-badge-new-text')}>
+      share: <Badge role={node.status === 'triggered' ? 'img' : undefined} aria-label={node.status === 'triggered' ? statuses.triggered : undefined} className={cx('gap-1 rounded-full px-2', node.status === 'triggered' && 'bg-chart-7/20 text-calendar-event-emerald-title')}>
         {node.status === 'triggered' ? <span aria-hidden>✓</span> : statuses[node.status]}
       </Badge>,
     },

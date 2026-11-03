@@ -72,7 +72,7 @@ for (const width of [1440, 390]) {
         await expect(columns.nth(2)).toHaveText(`${node.shares.toLocaleString('en-US')} 股`);
         const badge = columns.nth(3).locator(':scope > span');
         await expect(badge).toHaveClass(/rounded-full/);
-        await expect(badge).toHaveClass(node.status === 'triggered' ? /bg-badge-new-background/ : /bg-badge-neutral-background/);
+        await expect(badge).toHaveClass(node.status === 'triggered' ? /bg-chart-7\/20/ : /bg-badge-neutral-background/);
         await expect(badge.locator('[aria-hidden]')).toHaveCount(node.status === 'triggered' ? 1 : 0);
         if (node.status === 'triggered') {
           await expect(badge).toHaveText('✓');
