@@ -44,14 +44,10 @@
   --color-accent-900: var(--color-blue-900);
   --color-accent-950: var(--color-blue-950);
 
-  /* ----- Typography ----------------------------------------------------------
-   * Font sizes, weights, line-heights, and tracking all match Tailwind v4
-   * defaults. The only override is the family: Inter, loaded via next/font
-   * in app/layout.tsx, which exposes --font-inter to the document.
-   * --------------------------------------------------------------------------*/
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif,
-               "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
-               "Noto Color Emoji";
+  /* BoardUI Chinese font stack; Google Fonts is loaded by index.html. */
+  --font-sans: "Noto Sans SC", "Noto Sans SC Fallback", "Inter", "Inter Fallback", sans-serif;
+  /* Explicit Latin/code/number runs use Inter; Chinese still falls back to Noto. */
+  --font-latin: "Inter", "Inter Fallback", "Noto Sans SC", "Noto Sans SC Fallback", sans-serif;
 
   /* Monospace ramp for code blocks. Loaded via next/font in app/layout.tsx
    * (--font-mono-source → JetBrains Mono). Figma's spec uses IBM Plex Mono;

@@ -1,6 +1,10 @@
 import { test, expect, type Page } from '@playwright/test';
 import example from '../data/examples/investment.json' with { type: 'json' };
 
+test.beforeEach(async ({ page }) => {
+  await page.route('**/api/data/*', route => route.fulfill({ json: { origin: 'example' } }));
+});
+
 const concentration = (page: Page) => page.locator('section').filter({ has: page.getByRole('heading', { name: '集中度', exact: true }) }).last();
 
 test('concentration uses sorted current holdings, excludes cash, and follows both filters', async ({ page }) => {

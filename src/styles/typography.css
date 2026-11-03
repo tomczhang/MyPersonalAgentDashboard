@@ -5,10 +5,7 @@
  * text utility — `text-{name}` applies font-size + line-height + letter-spacing
  * + font-weight in one go.
  *
- * Family: Inter for the whole ramp. (The Figma export marks Large Title /
- * Regular as "Inter Display"; we map everything to Inter for consistency since
- * Inter ships a variable optical-size axis. Flag if a true Inter Display load
- * is needed.)
+ * Family: BoardUI Chinese stack in theme.css; explicit Latin runs use Inter.
  *
  * Weight mapping (mirrors Figma variables — font/weight/*):
  *   Regular   = 400

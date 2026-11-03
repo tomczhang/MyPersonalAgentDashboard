@@ -151,7 +151,7 @@ export function Tab({ className, children, icon: Icon, count, ref, ...props }: T
             className={cx(
               "inline-flex items-center gap-1.5",
               isSelected
-                ? "text-body-medium text-accent-600"
+                ? "text-body-medium text-accent-600 dark:text-accent-400"
                 : "text-body-regular text-text-primary",
             )}
           >

@@ -101,7 +101,7 @@ export function SegmentedControl({ className, children, variant = "solid", ref, 
       {variant === "solid" && thumb && (
         <span
           aria-hidden
-          className="pointer-events-none absolute left-0 top-0 rounded-md bg-segmented-control-selected-background shadow-2xs transition-[transform,width,height] duration-200 ease"
+          className="pointer-events-none absolute left-0 top-0 rounded-md bg-segmented-control-selected-background transition-[transform,width,height] duration-200 ease"
           style={{
             transform: `translate(${thumb.left}px, ${thumb.top}px)`,
             width: thumb.width,
@@ -135,7 +135,7 @@ export function SegmentedControlItem({
           "transition-colors duration-200 ease",
           "outline-none focus-visible:ring-2 focus-visible:ring-border-focus-ring",
           state.isSelected
-            ? "text-body-medium text-text-primary"
+            ? "text-body-medium text-accent-600 dark:text-accent-400"
             : "text-body-regular text-text-secondary hover:text-text-primary",
           state.isDisabled && "cursor-not-allowed opacity-50",
           typeof className === "function" ? className(state) : className,

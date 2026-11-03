@@ -159,7 +159,12 @@ export function ChartHeader({
               {format(display)}
             </p>
             {delta && (
-              <Chip variant="bold" color={delta.color} className={hovering ? "invisible" : undefined}>
+              <Chip variant="bold" color={delta.color} className={cx(
+                "tabular-nums",
+                delta.color === "lime" && "bg-chart-2/20 text-text-primary",
+                delta.color === "rose" && "bg-chart-3/20 text-text-primary",
+                hovering && "invisible",
+              )}>
                 {delta.label}
               </Chip>
             )}

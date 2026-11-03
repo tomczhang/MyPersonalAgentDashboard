@@ -104,6 +104,13 @@ body {
   color: var(--color-text-primary);
 }
 
+/* Noto includes Latin glyphs too. Explicit numeric and LTR content must select
+ * Inter first instead of silently taking Noto's Latin glyphs. Exclude html,
+ * whose dir=ltr configures layout for the Chinese app, not its font. */
+:where(.tabular-nums, bdi[dir="ltr"], code, .font-latin) {
+  font-family: var(--font-latin);
+}
+
 /* Theme-aware monochrome BoardUI mark. Both images keep their intrinsic
  * dimensions while the root theme class decides which one participates in
  * layout, avoiding a light-logo flash during hydration. */

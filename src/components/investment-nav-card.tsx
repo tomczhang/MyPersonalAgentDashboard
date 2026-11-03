@@ -25,9 +25,9 @@ export function InvestmentNavCard({ data, summary, range, onRangeChange, empty, 
   const { points, latest, average } = investmentComboData(data);
   return <Panel title="净值曲线">
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <p className="text-caption-1-medium text-text-tertiary">全组合 · USD · 截至 {asOf} · 不随账户 / 框架筛选</p>
+      <p className="text-caption-1-medium text-text-primary/65">全组合 · USD · 截至 {asOf} · 不随账户 / 框架筛选</p>
       <SegmentedControl aria-label="净值日期范围" selectedKeys={[range]} onSelectionChange={keys => onRangeChange([...keys][0] as Range)}>
-        {(['1M', 'YTD', '1Y', 'Max'] as const).map(id => <SegmentedControlItem key={id} id={id}>{id}</SegmentedControlItem>)}
+        {(['1M', 'YTD', '1Y', 'Max'] as const).map(id => <SegmentedControlItem key={id} id={id} className="font-latin">{id}</SegmentedControlItem>)}
       </SegmentedControl>
     </div>
     {latest ? <div className="mt-4 flex flex-col gap-4">
@@ -41,7 +41,7 @@ export function InvestmentNavCard({ data, summary, range, onRangeChange, empty, 
         delta={summary === undefined ? undefined : summary.changePct / 100}
         caption={row => row ? `收益率 ${typeof row.changePct === 'number' ? percent(row.changePct) : '—'}` : latest.date}
         tiles={false}
-        className="rounded-3xl border border-border-button-default"
+        className="rounded-3xl border border-border-button-default [&_.text-text-tertiary]:text-text-primary/65 [&_.text-text-secondary]:text-text-primary/75 [&_.recharts-cartesian-axis-tick-value]:fill-text-primary/65 [&_.recharts-cartesian-axis-tick-value]:text-caption-1-regular"
       />
       {/* Official tiles sum NAV snapshots and count missing rates as zero. Use the shared
           presentation component with correct summaries; no external hover callback exists. */}
@@ -49,12 +49,12 @@ export function InvestmentNavCard({ data, summary, range, onRangeChange, empty, 
         { label: '净值 · 最新', value: money(latest.value), color: 'var(--color-chart-2)' },
         { label: '收益率 · 平均', value: percent(average), color: 'var(--color-chart-4)' },
       ]} />
-      <div className="flex flex-col gap-1 text-caption-1-medium text-text-tertiary">
+      <div className="flex flex-col gap-1 text-caption-1-medium text-text-primary/65">
         <p>左轴：净值 USD；右轴：收益率 % · {data.length} 个快照点。净值受资金流入流出影响，不代表收益率。</p>
         <p>区间涨跌：{percent(summary?.changePct)}（填充方提供的完整序列区间，不随日期筛选重算）。</p>
         <p>{average === undefined ? '槽位暂无收益率数据，仅显示净值条形。' : '收益率平均为所选范围已填 changePct 的简单平均，缺失值不参与；不代表区间收益。'}</p>
         <p>悬停查看卡头当期净值与收益率；下方图例保留最新 / 平均汇总。</p>
       </div>
-    </div> : <div role="status" className="flex min-h-72 items-center justify-center text-body-regular text-text-tertiary">{empty ? '槽位暂无序列数据' : '所选范围暂无序列数据'}</div>}
+    </div> : <div role="status" className="flex min-h-72 items-center justify-center text-body-regular text-text-primary/65">{empty ? '槽位暂无序列数据' : '所选范围暂无序列数据'}</div>}
   </Panel>;
 }

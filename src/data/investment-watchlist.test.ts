@@ -4,19 +4,34 @@ import { parseModule } from '@/data/schema';
 import { levelLabel, watchlistSummary } from '@/data/investment-watchlist';
 
 const items = parseModule('investment', example).watchlist!;
-describe('watchlist grades and distance', () => {
-  it('derives the highest triggered grade, first waiting grade and all-triggered state', () => {
-    expect(items.map(item => watchlistSummary(item).label)).toEqual(['已触发 · 二级', '已触发 · 一级', '一级待触发', '已触发 · 三级']);
-    expect(watchlistSummary(items[3])).toMatchObject({ next: undefined, distancePct: null });
+describe('watchlist stages and interval progress', () => {
+  it('counts supplied stages instead of treating the highest level as a count', () => {
+    expect(items.map(item => watchlistSummary(item).triggeredCount)).toEqual([2, 1, 0, 3]);
+    expect(watchlistSummary(items[3])).toMatchObject({ next: undefined, progress: null, allTriggered: true });
     expect(levelLabel(12)).toBe('12级');
     const sparse = { ...items[0], levels: [{ level: 1, price: 100, status: 'triggered' as const }, { level: 5, price: 150, status: 'triggered' as const }] };
-    expect(watchlistSummary(sparse).label).toBe('已触发 · 五级');
+    expect(watchlistSummary(sparse)).toMatchObject({ triggeredCount: 2, total: 2, allTriggered: true });
   });
-  it('uses reference price as denominator for either direction and preserves zero', () => {
-    expect(watchlistSummary(items[0]).distancePct).toBeCloseTo(10 / 150 * 100);
-    expect(watchlistSummary(items[1]).distancePct).toBe(10);
-    expect(watchlistSummary({ ...items[0], referencePrice: 160 }).distancePct).toBe(0);
-    expect(watchlistSummary({ ...items[0], referencePrice: 0 }).distancePct).toBeNull();
+  it('measures signed progress within the previous-to-next interval for both directions', () => {
+    expect(watchlistSummary(items[0]).progress).toBe(0);
+    expect(watchlistSummary({ ...items[0], referencePrice: 155 }).progress).toBe(0.5);
+    expect(watchlistSummary({ ...items[1], referencePrice: 95 }).progress).toBe(0.5);
+    expect(watchlistSummary({ ...items[0], referencePrice: 160 }).progress).toBe(1);
+    expect(watchlistSummary({ ...items[1], referencePrice: 90 }).progress).toBe(1);
+  });
+  it('clamps prices beyond either endpoint without reclassifying supplied statuses', () => {
+    for (const [item, referencePrice, progress] of [[items[0], 0, 0], [items[0], 180, 1], [items[1], 120, 0], [items[1], 0, 1]] as const) {
+      const summary = watchlistSummary({ ...item, referencePrice });
+      expect(summary.progress).toBe(progress);
+      expect(summary.triggeredCount).toBe(item.levels.filter(node => node.status === 'triggered').length);
+    }
+  });
+  it('does not invent a baseline or mark pending stages as all triggered', () => {
+    expect(watchlistSummary(items[2]).progress).toBeNull();
+    const samePrice = { ...items[0], levels: items[0].levels.map(node => ({ ...node, price: 150 })) };
+    expect(watchlistSummary(samePrice).progress).toBeNull();
+    const pending = { ...items[0], levels: [{ level: 1, price: 0, status: 'pending' as const }] };
+    expect(watchlistSummary(pending)).toMatchObject({ next: undefined, progress: null, allTriggered: false });
   });
   it('rejects ambiguous or malformed ladders and the retired alerts field', () => {
     const invalid = [

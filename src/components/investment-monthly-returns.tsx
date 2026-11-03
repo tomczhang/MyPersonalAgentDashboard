@@ -54,7 +54,7 @@ export function InvestmentMonthlyReturns({ data }: { data?: Investment['monthlyR
         </table>
       </div>
       <div id={noteId} className="flex flex-col gap-2 text-caption-1-medium text-text-primary">
-        <p>正值为绿，负值为红；色深按全表最大绝对值分四档（25% / 50% / 75% / 100%）。0 为中性底；空格 = 无数据。</p>
+        <p>正值使用 chart 正向色，负值使用 error 色；色深按全表最大绝对值分四档（25% / 50% / 75% / 100%）。0 为中性底；空格 = 无数据。</p>
         <p>月度收益率由数据填充方提供，界面不推算。全组合口径，与净值卡一致，不随账户 / 框架筛选。</p>
       </div>
     </div>

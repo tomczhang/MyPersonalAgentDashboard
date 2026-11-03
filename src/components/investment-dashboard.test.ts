@@ -58,11 +58,11 @@ describe('investment dashboard rendering', () => {
     expect(html).not.toContain('>TWR<');
     expect(html).not.toContain('>投入资本<');
   });
-  it('renders watchlist grades and derived distances, and omits missing or empty watchlists', () => {
+  it('renders watchlist counts and interval progress, and omits missing or empty watchlists', () => {
     const slot = parseModule('investment', example);
-    slot.watchlist![0].referencePrice = 100;
+    slot.watchlist![0].referencePrice = 155;
     const html = render(slot);
-    for (const label of ['已触发 · 二级', '已触发 · 一级', '一级待触发', '距下一节点', '60%', '参考价']) expect(html).toContain(label);
+    for (const label of ['已触发', '共', '全部节点已触发', '距下一节点', '50%', '参考价', '缺少区间']) expect(html).toContain(label);
     slot.watchlist = [];
     expect(render(slot)).not.toContain('触发 / 观察名单');
     delete slot.watchlist;

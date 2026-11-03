@@ -1,6 +1,10 @@
 import { test, expect, type Page } from '@playwright/test';
 import example from '../data/examples/investment.json' with { type: 'json' };
 
+test.beforeEach(async ({ page }) => {
+  await page.route('**/api/data/*', route => route.fulfill({ json: { origin: 'example' } }));
+});
+
 const card = (page: Page) => page.locator('section').filter({ has: page.getByRole('heading', { name: '净值曲线', exact: true }) }).first();
 const chart = (page: Page) => card(page).locator('section');
 async function open(page: Page) {
