@@ -38,6 +38,25 @@ const performance = z.object({
   costs: z.number().finite().optional(), totalReturn: z.number().finite().optional(),
   twrPct: z.number().finite().optional(),
 }).strict();
+const watchlistItem = z.object({
+  symbol: text, name: text, direction: z.enum(['买入', '卖出', '观察']),
+  referencePrice: z.number().finite().nonnegative(),
+  levels: z.array(z.object({
+    level: z.number().int().positive(), price: z.number().finite().nonnegative(),
+    status: z.enum(['triggered', 'next', 'pending']), note: text.optional(),
+  }).strict()).min(1),
+}).strict().superRefine((item, ctx) => {
+  if (item.levels.some((node, i) => i > 0 && node.level <= item.levels[i - 1].level)) {
+    ctx.addIssue({ code: 'custom', path: ['levels'], message: '等级须唯一且按 level 升序排列' });
+  }
+  if (item.levels.filter(node => node.status === 'next').length > 1) {
+    ctx.addIssue({ code: 'custom', path: ['levels'], message: '至多一个 next 节点' });
+  }
+  const order = { triggered: 0, next: 1, pending: 2 };
+  if (item.levels.some((node, i) => i > 0 && order[node.status] < order[item.levels[i - 1].status])) {
+    ctx.addIssue({ code: 'custom', path: ['levels'], message: '梯子状态须依次为已触发、下一节点、远期节点' });
+  }
+});
 export const schemas = {
   investment: z.object({
     ...base, module: z.literal('investment'), currency: z.literal('USD'), managedAssets: positiveMoney,
@@ -45,16 +64,12 @@ export const schemas = {
     cashTiers: z.array(cashTier),
     ammunitionTotal: positiveMoney, accounts: z.array(account),
     holdings: z.array(holding),
-    // Optional extensions keep existing local slots readable. Plain amounts use currency;
+    // Presentation slots are optional. Retired alerts must migrate to watchlist. Plain amounts use currency;
     // percentages are percentage points. Their provenance is the module meta.
     positions: z.array(position).optional(), ammo: z.array(cashTier).optional(),
     series: z.array(z.object({ date, value: z.number().nonnegative(), changePct: z.number().finite().optional() }).strict()).optional(),
     seriesSummary: z.object({ changePct: z.number().finite() }).strict().optional(),
-    alerts: z.array(z.object({
-      symbol: text, name: text, direction: z.enum(['买入', '卖出', '观察']),
-      triggerPrice: z.number().nonnegative(), referencePrice: z.number().nonnegative(),
-      distancePct: z.number().finite(), status: z.enum(['triggered', 'near', 'watching']), note: text,
-    }).strict()).optional(),
+    watchlist: z.array(watchlistItem).optional(),
     benchmarkSeries: z.object({
       benchmarkLabel: text,
       points: z.array(z.object({ date, portfolio: z.number().positive(), benchmark: z.number().positive() }).strict()),

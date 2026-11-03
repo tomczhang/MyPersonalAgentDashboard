@@ -99,7 +99,7 @@ export function InvestmentDashboard({ data, origin }: { data: Investment; origin
         </div>
         <InvestmentNavCard data={series} summary={data.seriesSummary} range={range} onRangeChange={setRange} empty={!data.series?.length} asOf={data.meta.asOf} />
         <InvestmentBenchmarkCard data={data.benchmarkSeries} />
-        <InvestmentAlerts alerts={data.alerts} asOf={data.meta.asOf} />
+        <InvestmentAlerts watchlist={data.watchlist} asOf={data.meta.asOf} />
         <Panel title="持仓明细">
           <p className="mb-4 text-caption-1-medium text-text-tertiary">{scopeLabel} · {view.positions.length} 项 · 权重含现金 · 金额 USD · 截至 {data.meta.asOf}</p>
           <Table size="sm" aria-label="投资持仓明细"><TableHeader><TableColumn isRowHeader>名称 / 代码 × 股数</TableColumn><TableColumn className="hidden sm:table-cell">Buy in</TableColumn><TableColumn>市值<span className="sm:hidden"> / P/L</span></TableColumn><TableColumn className="hidden sm:table-cell">权重</TableColumn><TableColumn className="hidden sm:table-cell">现价</TableColumn><TableColumn className="hidden sm:table-cell">P/L</TableColumn></TableHeader><TableBody renderEmptyState={() => '当前视图暂无持仓'}>{view.positions.map((row, i) => <TableRow key={`${row.accountId}:${row.symbol}:${i}`} id={`${row.accountId}:${row.symbol}:${i}`}>

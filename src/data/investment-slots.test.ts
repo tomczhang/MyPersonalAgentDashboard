@@ -5,7 +5,7 @@ import { parseModule } from '@/data/schema';
 describe('investment optional presentation slots', () => {
   it('accepts legacy slots and preserves the retained dividend data', () => {
     const slot = parseModule('investment', example);
-    delete slot.alerts; delete slot.benchmarkSeries; delete slot.monthlyReturns;
+    delete slot.watchlist; delete slot.benchmarkSeries; delete slot.monthlyReturns;
     const parsed = parseModule('investment', slot);
     expect(parsed.dividends).toEqual(example.dividends);
     expect(parsed.performanceByYear).toEqual(example.performanceByYear);
@@ -21,12 +21,12 @@ describe('investment optional presentation slots', () => {
   });
   it('rejects invalid alert state, negative prices and zero benchmark bases', () => {
     const slot = structuredClone(example);
-    slot.alerts[0].status = 'unknown';
+    slot.watchlist[0].levels[0].status = 'unknown';
     expect(() => parseModule('investment', slot)).toThrow();
-    slot.alerts[0].status = 'triggered';
-    slot.alerts[0].triggerPrice = -1;
+    slot.watchlist[0].levels[0].status = 'triggered';
+    slot.watchlist[0].levels[0].price = -1;
     expect(() => parseModule('investment', slot)).toThrow();
-    slot.alerts[0].triggerPrice = 150;
+    slot.watchlist[0].levels[0].price = 150;
     slot.benchmarkSeries.points[0].portfolio = 0;
     expect(() => parseModule('investment', slot)).toThrow();
   });

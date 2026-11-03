@@ -58,14 +58,14 @@ describe('investment dashboard rendering', () => {
     expect(html).not.toContain('>TWR<');
     expect(html).not.toContain('>投入资本<');
   });
-  it('renders all alert states and supplied values, and omits missing or empty alerts', () => {
+  it('renders watchlist grades and derived distances, and omits missing or empty watchlists', () => {
     const slot = parseModule('investment', example);
-    slot.alerts![0].distancePct = -7;
+    slot.watchlist![0].referencePrice = 100;
     const html = render(slot);
-    for (const label of ['已触发', '临近触发', '观察中', '距触发 -7%', '触发价', '参考价']) expect(html).toContain(label);
-    slot.alerts = [];
+    for (const label of ['已触发 · 二级', '已触发 · 一级', '一级待触发', '距下一节点', '60%', '参考价']) expect(html).toContain(label);
+    slot.watchlist = [];
     expect(render(slot)).not.toContain('触发 / 观察名单');
-    delete slot.alerts;
+    delete slot.watchlist;
     expect(render(slot)).not.toContain('触发 / 观察名单');
   });
   it('keeps concentration unknown when the current holdings have no market value', () => {

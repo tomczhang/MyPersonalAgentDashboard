@@ -12,7 +12,7 @@ test('concentration uses sorted current holdings, excludes cash, and follows bot
   await expect(concentration(page)).toContainText('100%');
   await expect(page.getByRole('grid', { name: '投资持仓明细' })).toContainText('DEMO-C');
   await expect(page.getByRole('grid', { name: '投资持仓明细' })).not.toContainText('DEMO-D');
-  await expect(page.getByRole('grid', { name: '触发与观察名单' }).getByRole('row')).toHaveCount(5);
+  await expect(page.getByRole('list', { name: '触发与观察名单' }).getByRole('button')).toHaveCount(4);
   await expect(page.getByRole('heading', { name: '已收分红', exact: true })).toHaveCount(0);
   await expect(page.getByRole('heading', { name: '框架缺口合计', exact: true })).toHaveCount(0);
   await expect(page.locator('footer')).toContainText('集中度为前三大持仓市值');
