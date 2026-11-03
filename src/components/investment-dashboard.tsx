@@ -10,6 +10,7 @@ import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from 
 import { StatCards } from '@/components/application/dashboard/stat-cards';
 import { InvestmentNavCard } from '@/components/investment-nav-card';
 import { InvestmentBenchmarkCard } from '@/components/investment-benchmark-card';
+import { InvestmentMonthlyReturns } from '@/components/investment-monthly-returns';
 import { InvestmentAlerts } from '@/components/investment-alerts';
 import { Panel, Provenance, Status } from '@/components/module-content';
 import { confidenceLabels } from '@/data/presentation';
@@ -113,6 +114,7 @@ export function InvestmentDashboard({ data, origin }: { data: Investment; origin
           <p className="mb-4 text-caption-1-medium text-text-tertiary">当前视图 · 占总值比例包含持仓与现金</p>
           <Table size="sm" aria-label="子弹分层"><TableHeader><TableColumn isRowHeader>层级</TableColumn><TableColumn>存放位置</TableColumn><TableColumn>金额 USD</TableColumn><TableColumn>占总值</TableColumn></TableHeader><TableBody renderEmptyState={() => '当前视图暂无现金记录'}>{view.ammo.map((row, i) => <TableRow key={i} id={i}><TableCell>{row.tier}</TableCell><TableCell><bdi>{row.location}</bdi></TableCell><TableCell>{money(row.amount.value)}</TableCell><TableCell>{percent(share(row.amount.value, view.total))}</TableCell></TableRow>)}</TableBody></Table>
         </Panel>
+        <InvestmentMonthlyReturns data={data.monthlyReturns} />
       </div>
       <div className="flex min-w-0 flex-col gap-5 xl:col-span-4">
         <Panel title="资产配置">

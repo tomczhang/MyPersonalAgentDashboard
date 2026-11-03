@@ -397,6 +397,10 @@
   --color-chart-4-active: var(--color-sky-500);
   --color-chart-5:        var(--color-purple-400);
   --color-chart-5-active: var(--color-purple-500);
+  /* Signed monthly-return matrix: reuse the existing BoardUI green/red palette. */
+  --color-chart-return-positive: var(--color-chart-2);
+  --color-chart-return-negative: var(--color-text-error-primary);
+  --color-chart-return-on-fill: var(--color-neutral-950);
   --color-chart-6:        var(--color-blue-400);
   --color-chart-6-active: var(--color-blue-500);
   --color-chart-7:        var(--color-emerald-400);
@@ -819,6 +823,9 @@
   --color-chart-4-active: var(--color-chart-4-active);
   --color-chart-5:        var(--color-chart-5);
   --color-chart-5-active: var(--color-chart-5-active);
+  --color-chart-return-positive: var(--color-chart-return-positive);
+  --color-chart-return-negative: var(--color-chart-return-negative);
+  --color-chart-return-on-fill: var(--color-chart-return-on-fill);
   --color-chart-6:        var(--color-chart-6);
   --color-chart-6-active: var(--color-chart-6-active);
   --color-chart-7:        var(--color-chart-7);
