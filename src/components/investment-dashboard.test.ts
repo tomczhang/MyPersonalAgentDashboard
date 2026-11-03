@@ -12,7 +12,7 @@ function render(data = parseModule('investment', example)) {
 describe('investment dashboard rendering', () => {
   it('renders ordered dashboard sections with provenance and supplied performance', () => {
     const html = render();
-    const labels = ['净值曲线', '触发 / 观察名单', '持仓明细', '子弹分层', '资产配置', '分年绩效拆解', '账户快照'];
+    const labels = ['净值曲线', '基准对比', '触发 / 观察名单', '持仓明细', '子弹分层', '资产配置', '分年绩效拆解', '账户快照'];
     const indices = labels.map(label => html.indexOf(`>${label}<`));
     expect(indices.every(index => index >= 0)).toBe(true);
     expect(indices).toEqual([...indices].sort((a, b) => a - b));

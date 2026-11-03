@@ -9,6 +9,7 @@ import { Tabs, TabList, Tab, TabPanel } from '@/components/base/tabs/tabs';
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from '@/components/base/table/table';
 import { StatCards } from '@/components/application/dashboard/stat-cards';
 import { InvestmentNavCard } from '@/components/investment-nav-card';
+import { InvestmentBenchmarkCard } from '@/components/investment-benchmark-card';
 import { InvestmentAlerts } from '@/components/investment-alerts';
 import { Panel, Provenance, Status } from '@/components/module-content';
 import { confidenceLabels } from '@/data/presentation';
@@ -96,6 +97,7 @@ export function InvestmentDashboard({ data, origin }: { data: Investment; origin
           ]} />
         </div>
         <InvestmentNavCard data={series} summary={data.seriesSummary} range={range} onRangeChange={setRange} empty={!data.series?.length} asOf={data.meta.asOf} />
+        <InvestmentBenchmarkCard data={data.benchmarkSeries} />
         <InvestmentAlerts alerts={data.alerts} asOf={data.meta.asOf} />
         <Panel title="持仓明细">
           <p className="mb-4 text-caption-1-medium text-text-tertiary">{scopeLabel} · {view.positions.length} 项 · 权重含现金 · 金额 USD · 截至 {data.meta.asOf}</p>
