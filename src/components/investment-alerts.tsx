@@ -6,7 +6,7 @@ import { money, type Investment } from '@/data/investment-view';
 import { watchlistLevelColor, watchlistSummary, type WatchlistItem } from '@/data/investment-watchlist';
 import { cx } from '@/utils/cx';
 
-const statuses = { triggered: '已触发', next: '下一个', pending: '待触发' };
+const statuses = { triggered: '已触发', next: '待触发', pending: '待触发' };
 const directions = {
   买入: 'bg-chart-1/15 text-chart-1-active',
   卖出: 'bg-chart-3/15 text-chart-3-active',
@@ -23,7 +23,7 @@ function WatchlistCard({ item }: { item: WatchlistItem }) {
     display: {
       label: <bdi dir="ltr">{money(node.price)}</bdi>,
       value: node.shares === undefined ? '—' : <><bdi dir="ltr">{node.shares.toLocaleString('en-US')}</bdi> 股</>,
-      share: <Badge role={node.status === 'triggered' ? 'img' : undefined} aria-label={node.status === 'triggered' ? statuses.triggered : undefined} className={cx('gap-1 rounded-full px-2', node.status !== 'pending' && 'bg-badge-new-background text-badge-new-text')}>
+      share: <Badge role={node.status === 'triggered' ? 'img' : undefined} aria-label={node.status === 'triggered' ? statuses.triggered : undefined} className={cx('gap-1 rounded-full px-2', node.status === 'triggered' && 'bg-badge-new-background text-badge-new-text')}>
         {node.status === 'triggered' ? <span aria-hidden>✓</span> : statuses[node.status]}
       </Badge>,
     },

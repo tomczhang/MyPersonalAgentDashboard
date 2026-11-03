@@ -59,7 +59,8 @@ for (const width of [1440, 390]) {
       await expect(cards(page).first()).toHaveAttribute('aria-expanded', 'true');
       const controlId = await cards(page).first().getAttribute('aria-controls');
       await expect(ladder(page)).toHaveAttribute('id', controlId!);
-      for (const label of ['下一个', '待触发', 'US$180.00', '1,000 股']) await expect(ladder(page)).toContainText(label);
+      for (const label of ['待触发', 'US$180.00', '1,000 股']) await expect(ladder(page)).toContainText(label);
+      await expect(ladder(page)).not.toContainText('下一个');
       await expect(ladder(page)).not.toContainText('已触发');
       await expect(ladder(page)).not.toContainText(/一级|二级|三级|四级|虚构阈值|虚构分级观察节点/);
       const rows = ladder(page).locator(':scope > div > div');
@@ -71,14 +72,14 @@ for (const width of [1440, 390]) {
         await expect(columns.nth(2)).toHaveText(`${node.shares.toLocaleString('en-US')} 股`);
         const badge = columns.nth(3).locator(':scope > span');
         await expect(badge).toHaveClass(/rounded-full/);
-        await expect(badge).toHaveClass(node.status === 'pending' ? /bg-badge-neutral-background/ : /bg-badge-new-background/);
+        await expect(badge).toHaveClass(node.status === 'triggered' ? /bg-badge-new-background/ : /bg-badge-neutral-background/);
         await expect(badge.locator('[aria-hidden]')).toHaveCount(node.status === 'triggered' ? 1 : 0);
         if (node.status === 'triggered') {
           await expect(badge).toHaveText('✓');
           await expect(badge).toHaveAttribute('aria-label', '已触发');
           await expect(badge).toHaveAccessibleName('已触发');
         } else {
-          await expect(badge).toHaveText(node.status === 'next' ? '下一个' : '待触发');
+          await expect(badge).toHaveText('待触发');
         }
         const color = await segments.nth(index).evaluate(node => getComputedStyle(node).backgroundColor);
         await expect(columns.first()).toHaveCSS('background-color', color);
