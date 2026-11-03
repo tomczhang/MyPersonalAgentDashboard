@@ -28,6 +28,7 @@ const attribution = { accountId: maskedId.optional(), bucket: text.optional(), i
 const cashTier = z.object({ tier: text, location: text, amount: positiveMoney, ...attribution }).strict();
 const position = holding.extend({
   name: text.optional(), ...attribution,
+  buyInAmount: z.number().nonnegative().optional(), buyInPerShare: z.number().nonnegative().optional(),
   pnlAmount: z.number().finite().nullable(), pnlPct: z.number().finite().nullable(),
   costCaliber: text, inFramework: z.boolean(),
 });
