@@ -9,7 +9,7 @@ import { Tabs, TabList, Tab, TabPanel } from '@/components/base/tabs/tabs';
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from '@/components/base/table/table';
 import { StatCards } from '@/components/application/dashboard/stat-cards';
 import { InvestmentNavCard } from '@/components/investment-nav-card';
-import { EarningsChartCard } from '@/components/application/dashboard/earnings-chart-card';
+import { InvestmentAlerts } from '@/components/investment-alerts';
 import { Panel, Provenance, Status } from '@/components/module-content';
 import { confidenceLabels } from '@/data/presentation';
 import { filterSeries, investmentView, money, percent, share, type Investment, type Range } from '@/data/investment-view';
@@ -60,6 +60,8 @@ export function InvestmentDashboard({ data, origin }: { data: Investment; origin
   const cashDeviation = cashRatio === null ? null : cashRatio - data.framework.cashTargetRatio.value * 100;
   const series = filterSeries(data.series, range, data.meta.asOf);
   const holdingTotal = view.positions.reduce((sum, row) => sum + row.valueUsd.value, 0);
+  const topThreeTotal = [...view.positions].sort((a, b) => b.valueUsd.value - a.valueUsd.value).slice(0, 3).reduce((sum, row) => sum + row.valueUsd.value, 0);
+  const concentration = view.complete ? share(topThreeTotal, holdingTotal) : null;
   const costCalibers = [...new Set(view.positions.map(row => row.costCaliber ?? '未标注'))];
   const filteredPerformance = view.filtered ? undefined : performance?.totalReturn;
   const cashGap = view.total === null || view.cash === null ? null : view.total * data.framework.cashTargetRatio.value - view.cash;
@@ -84,16 +86,17 @@ export function InvestmentDashboard({ data, origin }: { data: Investment; origin
       <div className="flex min-w-0 flex-col gap-5 xl:col-span-8">
         <div className="flex flex-col gap-3">
           <p aria-live="polite" className="text-body-2-medium text-text-secondary">当前视图：{scopeLabel}</p>
-          <p className="text-caption-1-medium text-text-tertiary">组合总值 = 当前持仓市值 + 当前现金；权重以此总值为分母。仅框架内保留已标记的现金。筛选视图按同一目标比例重算配置缺口。独立观察账户不计入。</p>
+          <p className="text-caption-1-medium text-text-tertiary">组合总值 = 当前持仓市值 + 当前现金。</p>
           {!view.complete && <p role="status" className="text-body-2-medium text-text-error-primary">槽位缺少账户或框架归属；仅列出已匹配条目，汇总与权重暂不显示。</p>}
           <StatCards compact className="xl:grid-cols-4" stats={[
             { label: '组合总值', value: money(view.total), icon: RiBankLine, caption: <div className="flex flex-col gap-1"><span>基准币种 USD · 持仓与现金均按 USD 槽位汇总</span><span>换算参考 {data.fx.pair}：{data.fx.rate.value} {data.fx.rate.unit}</span><Provenance metric={data.fx.rate} /></div> },
             { label: '现金占比', value: percent(cashRatio), icon: RiCoinsLine, caption: <div className="flex flex-col gap-1"><span>目标 {percent(data.framework.cashTargetRatio.value * 100)} · 现金 {money(view.cash)}</span><span className={cx(cashDeviation === null || Math.abs(cashDeviation) < 0.005 ? 'text-text-secondary' : 'text-text-error-primary')}>偏差 {cashDeviation == null ? '—' : `${cashDeviation > 0 ? '+' : ''}${percent(cashDeviation).replace('%', '')} 个百分点`}</span></div> },
             { label: `${year ?? '年度'} 收益`, value: <span className={tone(filteredPerformance)}>{signed(filteredPerformance)}</span>, icon: RiFundsLine, caption: <div className="flex flex-col gap-2">{years.length > 0 && <Select aria-label="KPI 收益年份" selectedKey={year} onSelectionChange={key => setChosenYear(String(key))}>{years.map(y => <SelectItem key={y} id={y}>{y} 年</SelectItem>)}</Select>}<span>{view.filtered ? '槽位暂无当前筛选视图的年度收益' : '读取年度 totalReturn；不由持仓 P/L 推算'}</span></div> },
-            { label: '框架缺口合计', value: money(view.gap), icon: RiPieChartLine, caption: '三桶正缺口之和；超配不抵消缺口。现金已归桶，不重复计入。' },
+            { label: '集中度', value: percent(concentration), icon: RiPieChartLine, caption: '前三大持仓权重合计 · 按当前视图持仓市值计算' },
           ]} />
         </div>
         <InvestmentNavCard data={series} summary={data.seriesSummary} range={range} onRangeChange={setRange} empty={!data.series?.length} asOf={data.meta.asOf} />
+        <InvestmentAlerts alerts={data.alerts} asOf={data.meta.asOf} />
         <Panel title="持仓明细">
           <p className="mb-4 text-caption-1-medium text-text-tertiary">{scopeLabel} · {view.positions.length} 项 · 权重含现金 · 金额 USD · 截至 {data.meta.asOf}</p>
           <Table size="sm" aria-label="投资持仓明细"><TableHeader><TableColumn isRowHeader>名称 / 代码 × 股数</TableColumn><TableColumn className="hidden sm:table-cell">Buy in</TableColumn><TableColumn>市值<span className="sm:hidden"> / P/L</span></TableColumn><TableColumn className="hidden sm:table-cell">权重</TableColumn><TableColumn className="hidden sm:table-cell">现价</TableColumn><TableColumn className="hidden sm:table-cell">P/L</TableColumn></TableHeader><TableBody renderEmptyState={() => '当前视图暂无持仓'}>{view.positions.map((row, i) => <TableRow key={`${row.accountId}:${row.symbol}:${i}`} id={`${row.accountId}:${row.symbol}:${i}`}>
@@ -107,10 +110,6 @@ export function InvestmentDashboard({ data, origin }: { data: Investment; origin
         <Panel title="子弹分层">
           <p className="mb-4 text-caption-1-medium text-text-tertiary">当前视图 · 占总值比例包含持仓与现金</p>
           <Table size="sm" aria-label="子弹分层"><TableHeader><TableColumn isRowHeader>层级</TableColumn><TableColumn>存放位置</TableColumn><TableColumn>金额 USD</TableColumn><TableColumn>占总值</TableColumn></TableHeader><TableBody renderEmptyState={() => '当前视图暂无现金记录'}>{view.ammo.map((row, i) => <TableRow key={i} id={i}><TableCell>{row.tier}</TableCell><TableCell><bdi>{row.location}</bdi></TableCell><TableCell>{money(row.amount.value)}</TableCell><TableCell>{percent(share(row.amount.value, view.total))}</TableCell></TableRow>)}</TableBody></Table>
-        </Panel>
-        <Panel title="已收分红">
-          <p className="mb-4 text-caption-1-medium text-text-tertiary">全组合历史 · USD · 截至 {data.meta.asOf} · 仅展示已收到的分红</p>
-          {data.dividends ? <div className="grid gap-4"><EarningsChartCard data={data.dividends.byYear} /><StatCards compact className="xl:grid-cols-2" stats={[{ label: '总已收', value: money(data.dividends.totalReceived), caption: '累计已收分红 · 槽位填充值', icon: RiCoinsLine }, { label: 'TTM 股息率', value: percent(data.dividends.yieldTtmPct), caption: '过去 12 个月 · 槽位填充值', icon: RiPieChartLine }]} /></div> : <Empty>槽位暂无已收分红数据</Empty>}
         </Panel>
       </div>
       <div className="flex min-w-0 flex-col gap-5 xl:col-span-4">

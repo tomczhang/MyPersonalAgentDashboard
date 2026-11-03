@@ -68,7 +68,10 @@ export function App() {
       {visible.length === 0 && <Panel title="暂无此状态的数据"><p className="text-body-regular text-text-secondary">可切换「所有状态」查看模块，或让 Muse 按说明书更新本地槽位。</p></Panel>}
       <section id="filling-help"><Panel title="让你的 Muse 来填数据"><div className="flex flex-col gap-3 text-body-regular text-text-secondary"><p>请让你的 PA agent 阅读仓库中的 <code dir="ltr">docs/FILLING_GUIDE.md</code> 和 <code dir="ltr">data/CONTRACT.md</code>，按模块收集信息并创建待确认草稿。</p><p>真实数据仅存放在 <code dir="ltr">data/local/</code>。你确认后，Muse 才能将状态改为 confirmed；刷新页面即可读取新文件。</p></div></Panel></section>
     </> : slots[page]?.state === 'ready' ? <PageContent loaded={(slots[page] as Extract<Slot, { state: 'ready' }>).loaded} /> : <ErrorCard id={page} />}
-    <footer className="border-t border-separator-border py-4 text-caption-1-medium text-text-tertiary">Muse Board · 公开模板仅包含虚构示例。数据状态、日期与来源以各槽位标注为准。</footer>
+    <footer className="flex flex-col gap-2 border-t border-separator-border py-4 text-caption-1-medium text-text-tertiary">
+      {page === 'investment' && <p>组合总值 = 当前持仓市值 + 当前现金；持仓表权重以此总值为分母。集中度为前三大持仓市值占当前视图持仓总市值的比例，不含现金。仅框架内保留已标记的现金。筛选视图按同一目标比例重算配置缺口。独立观察账户不计入。</p>}
+      <p>Muse Board · 公开模板仅包含虚构示例。数据状态、日期与来源以各槽位标注为准。</p>
+    </footer>
   </DashboardShell>;
 }
 function PageContent({ loaded }: { loaded: LoadedModule }) {

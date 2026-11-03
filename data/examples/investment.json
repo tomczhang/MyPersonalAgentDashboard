@@ -596,5 +596,153 @@
         "amount": 10000
       }
     ]
-  }
+  },
+  "alerts": [
+    {
+      "symbol": "DEMO-A",
+      "name": "虚构稳健资产",
+      "direction": "卖出",
+      "triggerPrice": 150,
+      "referencePrice": 150,
+      "distancePct": 0,
+      "status": "triggered",
+      "note": "虚构阈值已触及，仅作展示。"
+    },
+    {
+      "symbol": "DEMO-E",
+      "name": "虚构候选资产",
+      "direction": "买入",
+      "triggerPrice": 100,
+      "referencePrice": 102,
+      "distancePct": 2,
+      "status": "near",
+      "note": "虚构观察参考价，临近预设阈值。"
+    },
+    {
+      "symbol": "DEMO-C",
+      "name": "虚构创新资产",
+      "direction": "观察",
+      "triggerPrice": 100,
+      "referencePrice": 110,
+      "distancePct": 10,
+      "status": "watching",
+      "note": "虚构观察区间，保持跟踪。"
+    },
+    {
+      "symbol": "DEMO-D",
+      "name": "虚构观察资产",
+      "direction": "买入",
+      "triggerPrice": 50,
+      "referencePrice": 50,
+      "distancePct": 0,
+      "status": "triggered",
+      "note": "虚构观察阈值已触及。"
+    }
+  ],
+  "benchmarkSeries": {
+    "benchmarkLabel": "虚构宽基指数",
+    "points": [
+      {
+        "date": "2025-11-01",
+        "portfolio": 100,
+        "benchmark": 100
+      },
+      {
+        "date": "2025-12-01",
+        "portfolio": 102,
+        "benchmark": 101
+      },
+      {
+        "date": "2026-01-01",
+        "portfolio": 104,
+        "benchmark": 103
+      },
+      {
+        "date": "2026-02-01",
+        "portfolio": 106,
+        "benchmark": 104
+      },
+      {
+        "date": "2026-03-01",
+        "portfolio": 104,
+        "benchmark": 102
+      },
+      {
+        "date": "2026-04-01",
+        "portfolio": 108,
+        "benchmark": 105
+      },
+      {
+        "date": "2026-05-01",
+        "portfolio": 110,
+        "benchmark": 107
+      },
+      {
+        "date": "2026-06-01",
+        "portfolio": 108,
+        "benchmark": 106
+      },
+      {
+        "date": "2026-07-01",
+        "portfolio": 112,
+        "benchmark": 109
+      },
+      {
+        "date": "2026-08-01",
+        "portfolio": 114,
+        "benchmark": 110
+      },
+      {
+        "date": "2026-09-01",
+        "portfolio": 116,
+        "benchmark": 112
+      },
+      {
+        "date": "2026-10-01",
+        "portfolio": 118,
+        "benchmark": 114
+      },
+      {
+        "date": "2026-11-01",
+        "portfolio": 120,
+        "benchmark": 116
+      }
+    ]
+  },
+  "monthlyReturns": [
+    {
+      "year": 2025,
+      "months": [
+        1,
+        2,
+        -1,
+        0,
+        3,
+        -2,
+        1,
+        2,
+        -1,
+        1,
+        2,
+        1
+      ]
+    },
+    {
+      "year": 2026,
+      "months": [
+        2,
+        1,
+        -2,
+        3,
+        2,
+        -1,
+        3,
+        2,
+        1,
+        1,
+        null,
+        null
+      ]
+    }
+  ]
 }

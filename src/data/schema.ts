@@ -50,6 +50,18 @@ export const schemas = {
     positions: z.array(position).optional(), ammo: z.array(cashTier).optional(),
     series: z.array(z.object({ date, value: z.number().nonnegative(), changePct: z.number().finite().optional() }).strict()).optional(),
     seriesSummary: z.object({ changePct: z.number().finite() }).strict().optional(),
+    alerts: z.array(z.object({
+      symbol: text, name: text, direction: z.enum(['买入', '卖出', '观察']),
+      triggerPrice: z.number().nonnegative(), referencePrice: z.number().nonnegative(),
+      distancePct: z.number().finite(), status: z.enum(['triggered', 'near', 'watching']), note: text,
+    }).strict()).optional(),
+    benchmarkSeries: z.object({
+      benchmarkLabel: text,
+      points: z.array(z.object({ date, portfolio: z.number().positive(), benchmark: z.number().positive() }).strict()),
+    }).strict().optional(),
+    monthlyReturns: z.array(z.object({
+      year: z.number().int().min(1900).max(9999), months: z.array(z.number().finite().nullable()).length(12),
+    }).strict()).optional(),
     performanceByYear: z.record(z.string().regex(/^\d{4}$/), performance).optional(),
     dividends: z.object({ totalReceived: z.number().nonnegative(), yieldTtmPct: z.number().nonnegative(), byYear: z.array(z.object({ year: z.number().int().min(1900).max(9999), amount: z.number().nonnegative() }).strict()) }).strict().optional(),
     independentAccounts: z.array(account.extend({ includedInManagedAssets: z.literal(false), note: text })),
