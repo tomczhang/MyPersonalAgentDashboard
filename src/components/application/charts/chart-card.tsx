@@ -11,7 +11,7 @@ import {
   DropdownPopover,
   DropdownTrigger,
 } from "@/components/base/dropdown/dropdown";
-import { useCountUp } from "@/hooks/use-count-up";
+import { useCountUpPrecise } from "@/hooks/use-count-up";
 import { cx } from "@/utils/cx";
 
 /**
@@ -75,20 +75,6 @@ export function describeDelta(delta: number): { label: string; color: DeltaColor
 
 export const formatNumber = (n: number) => n.toLocaleString("en-US");
 
-/** Decimal places a value carries (capped at 2), so fractional data such as
- *  "48.8h" keeps its precision through the integer-stepping count-up. */
-function decimalsOf(n: number) {
-  if (Number.isInteger(n)) return 0;
-  return Math.abs(n * 10 - Math.round(n * 10)) < 1e-6 ? 1 : 2;
-}
-
-/** `useCountUp` that preserves up to two decimals by counting in scaled units. */
-function useCountUpPrecise(value: number) {
-  const scale = 10 ** decimalsOf(value);
-  const display = useCountUp(Math.round(value * scale));
-  return display / scale;
-}
-
 /* ------------------------------------------------------------------ shell */
 
 export function ChartCard({ className, children }: { className?: string; children: ReactNode }) {
@@ -110,6 +96,7 @@ export function ChartCard({ className, children }: { className?: string; childre
 export function ChartHeader({
   label,
   value,
+  valueText,
   format = formatNumber,
   delta,
   hovering = false,
@@ -126,6 +113,8 @@ export function ChartHeader({
   /** Headline number; animates between values with `useCountUp`. Omit for a
    *  single-line header (the ring charts keep their number in the centre). */
   value?: number;
+  /** Explicit fallback for unavailable values; never render a fabricated zero. */
+  valueText?: string;
   format?: (n: number) => string;
   /** Delta chip beside the headline; hidden while `hovering` so the hovered
    *  value stands alone, matching the other chart cards. */
@@ -150,13 +139,13 @@ export function ChartHeader({
     <div className={cx("flex w-full items-start justify-between gap-3", className)}>
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <p className="w-full truncate text-body-medium text-text-secondary">{label}</p>
-        {value !== undefined && (
+        {(value !== undefined || valueText !== undefined) && (
           <div className="flex w-full items-center gap-2">
             <p
               key={fadeKey}
               className="animate-number-fade text-title-1-medium whitespace-nowrap text-text-primary tabular-nums"
             >
-              {format(display)}
+              {valueText ?? format(display)}
             </p>
             {delta && (
               <Chip variant="bold" color={delta.color} className={cx(
@@ -252,7 +241,7 @@ export function ChartRangeSelect({
   return localize((
     <Dropdown isOpen={open} onOpenChange={setOpen}>
       <DropdownTrigger
-        aria-label="Change period"
+        aria-label={current?.label ?? 'Change period'}
         className={cx(
           RANGE_PILL,
           "pe-1.5 transition-colors duration-150 ease-out hover:bg-background-primary-hover",
@@ -300,6 +289,7 @@ export function ChartRangeSelect({
  */
 export function ChartCenterReadout({
   value,
+  label,
   format = formatNumber,
   caption,
   fadeKey,
@@ -307,6 +297,7 @@ export function ChartCenterReadout({
   className,
 }: {
   value: number;
+  label?: string;
   format?: (n: number) => string;
   caption?: string;
   fadeKey?: string;
@@ -325,6 +316,7 @@ export function ChartCenterReadout({
         className,
       )}
     >
+      {label && <span className="max-w-40 text-center text-body-semibold text-text-secondary">{label}</span>}
       <span
         key={fadeKey}
         className={cx(

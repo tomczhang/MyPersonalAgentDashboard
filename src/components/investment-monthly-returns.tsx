@@ -1,5 +1,4 @@
 "use client";
-import { useId } from 'react';
 import { Panel } from '@/components/module-content';
 import type { Investment } from '@/data/investment-view';
 import { cx } from '@/utils/cx';
@@ -26,15 +25,14 @@ export function monthlyReturnsData(data: NonNullable<Investment['monthlyReturns'
 }
 
 export function InvestmentMonthlyReturns({ data }: { data?: Investment['monthlyReturns'] }) {
-  const noteId = useId();
   if (!data?.length) return null;
   const rows = monthlyReturnsData(data);
-  return <Panel title="月度收益">
+  return <Panel title="月度收益" className="border-0 bg-background-secondary-default">
     <div className="flex min-w-0 flex-col gap-4">
       {/* Dedicated signed matrix, explicitly approved in place of the official heatmap.
           Native row/column headers keep the display accessible without chart tooling. */}
       <div role="region" aria-label="月度收益矩阵，可横向滚动" tabIndex={0} className="max-w-full overflow-x-auto rounded-md outline-none focus-visible:ring-2 focus-visible:ring-border-focus-ring">
-        <table aria-label="月度收益率" aria-describedby={noteId} className="w-full min-w-160 border-separate border-spacing-1 text-center text-caption-1-medium tabular-nums">
+        <table aria-label="月度收益率" className="w-full min-w-160 border-separate border-spacing-1 text-center text-caption-1-medium tabular-nums">
           <thead><tr>
             <th scope="col" className="px-2 py-2 text-text-primary">年份</th>
             {months.map(month => <th key={month} scope="col" className="px-1 py-2 text-text-primary">{month}</th>)}
@@ -52,10 +50,6 @@ export function InvestmentMonthlyReturns({ data }: { data?: Investment['monthlyR
             ><bdi dir="ltr">{cell.label}</bdi></td>)}
           </tr>)}</tbody>
         </table>
-      </div>
-      <div id={noteId} className="flex flex-col gap-2 text-caption-1-medium text-text-primary">
-        <p>正值使用 chart 正向色，负值使用 error 色；色深按全表最大绝对值分四档（25% / 50% / 75% / 100%）。0 为中性底；空格 = 无数据。</p>
-        <p>月度收益率由数据填充方提供，界面不推算。全组合口径，与净值卡一致，不随账户 / 框架筛选。</p>
       </div>
     </div>
   </Panel>;

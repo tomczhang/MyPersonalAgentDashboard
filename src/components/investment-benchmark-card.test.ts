@@ -29,9 +29,9 @@ describe('benchmark comparison slot adapter', () => {
     expect(render({ ...slot, points: slot.points.slice(0, 1) })).toBe('');
     expect(render(slot)).toContain('基准对比');
   });
-  it('renders supplied benchmark naming and explicit scope and native legend limitations', () => {
+  it('renders supplied benchmark naming and scope', () => {
     const html = render(slot);
-    for (const label of ['虚构测试基准', '归一化起点 100', '不随账户 / 框架筛选', '非实时行情', '图例数值为各期指数之和']) expect(html).toContain(label);
+    for (const label of ['虚构测试基准', '全组合 · 起点 100']) expect(html).toContain(label);
     expect(html).toContain('>90<');
     expect(html).not.toContain('Visitors');
   });

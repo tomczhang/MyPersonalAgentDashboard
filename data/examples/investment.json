@@ -560,6 +560,20 @@
       "changePct": 1.3
     }
   ],
+  "returnComparison": [
+    { "date": "2025-11-30", "income": 6000, "portfolioPct": 2, "sp500Pct": 1.1, "nasdaq100Pct": 1.6 },
+    { "date": "2025-12-31", "income": 3000, "portfolioPct": 1, "sp500Pct": 0.8, "nasdaq100Pct": 1.2 },
+    { "date": "2026-01-31", "income": 5000, "portfolioPct": 2, "sp500Pct": 1.2, "nasdaq100Pct": 1.8 },
+    { "date": "2026-02-28", "income": 3000, "portfolioPct": 1, "sp500Pct": 0.5, "nasdaq100Pct": 0.8 },
+    { "date": "2026-03-31", "income": -4000, "portfolioPct": -2, "sp500Pct": -1.5, "nasdaq100Pct": -2.5 },
+    { "date": "2026-04-30", "income": 7000, "portfolioPct": 3, "sp500Pct": 1.8, "nasdaq100Pct": 2.5 },
+    { "date": "2026-05-31", "income": 5000, "portfolioPct": 2, "sp500Pct": 1.4, "nasdaq100Pct": 2.2 },
+    { "date": "2026-06-30", "income": -2000, "portfolioPct": -1, "sp500Pct": -0.5, "nasdaq100Pct": -1.2 },
+    { "date": "2026-07-31", "income": 8000, "portfolioPct": 3, "sp500Pct": 2, "nasdaq100Pct": 2.8 },
+    { "date": "2026-08-31", "income": 6000, "portfolioPct": 2, "sp500Pct": 1.2, "nasdaq100Pct": 1.7 },
+    { "date": "2026-09-30", "income": 7000, "portfolioPct": 1, "sp500Pct": 0.6, "nasdaq100Pct": 0.9 },
+    { "date": "2026-10-31", "income": 5000, "portfolioPct": 1, "sp500Pct": 0.8, "nasdaq100Pct": 1.3 }
+  ],
   "seriesSummary": {
     "changePct": 15.4
   },

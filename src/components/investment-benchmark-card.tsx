@@ -19,9 +19,9 @@ export function investmentBenchmarkData(slot: NonNullable<Investment['benchmarkS
 export function InvestmentBenchmarkCard({ data }: { data?: Investment['benchmarkSeries'] }) {
   if (!data || data.points.length < 2) return null;
   const points = investmentBenchmarkData(data);
-  return <Panel title="基准对比">
+  return <Panel title="基准对比" className="border-0 bg-background-secondary-default">
     <div className="flex flex-col gap-4">
-      <p className="text-caption-1-medium text-text-primary/75">归一化起点 100 · 全组合 · 不随账户 / 框架筛选 · 基准为槽位数据，非实时行情</p>
+      <p className="text-caption-1-medium text-text-tertiary">全组合 · 起点 100 · {data.points[0].date} — {data.points.at(-1)!.date}</p>
       <AreaChartCard
         variant="overlap"
         title="组合 · 最新指数"
@@ -33,12 +33,8 @@ export function InvestmentBenchmarkCard({ data }: { data?: Investment['benchmark
         headline={Number(points.at(-1)!.portfolio)}
         format={indexFormat}
         tiles={false}
-        className="rounded-3xl border border-border-button-default [&_.text-text-tertiary]:text-text-primary/65 [&_.text-text-secondary]:text-text-primary/75 [&_.recharts-cartesian-axis-tick-value]:fill-text-primary/65 [&_.recharts-cartesian-axis-tick-value]:text-caption-1-regular"
+        className="rounded-none px-0 [&_.text-text-tertiary]:text-text-primary/65 [&_.text-text-secondary]:text-text-primary/75 [&_.recharts-cartesian-axis-tick-value]:fill-text-primary/65 [&_.recharts-cartesian-axis-tick-value]:text-caption-1-regular"
       />
-      <div className="flex flex-col gap-1 text-caption-1-medium text-text-primary/75">
-        <p>完整槽位区间：{data.points[0].date} 至 {data.points.at(-1)!.date} · 不随净值日期范围切换。双面积重叠，同轴比较指数高度。</p>
-        <p>悬停查看当期组合与基准指数；卡头显示组合值。未悬停时，卡头为组合最新指数，图例数值为各期指数之和，不代表收益或最新指数。</p>
-      </div>
     </div>
   </Panel>;
 }

@@ -2,7 +2,8 @@
 
 import { useTemplateCopy } from "@/components/foundations/template-copy/template-copy";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useState, type ReactNode } from "react";
+import { useReducedMotion } from 'motion/react';
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import {
   ChartCard,
@@ -75,6 +76,10 @@ export interface AreaChartCardProps {
   defaultRange?: string;
   onRangeChange?: (id: string) => void;
   format?: (n: number) => string;
+  axisFormat?: (n: number) => string;
+  labelFormat?: (label: string) => string;
+  renderHeader?: (point?: AreaPoint) => ReactNode;
+  legendSummary?: 'total' | 'latest';
   /** Stat tiles under the chart, one per series (its total, or the hovered
    *  category's value). The card grows to fit. */
   tiles?: boolean;
@@ -144,12 +149,17 @@ export function AreaChartCard({
   defaultRange,
   onRangeChange,
   format = formatNumber,
+  axisFormat,
+  labelFormat,
+  renderHeader,
+  legendSummary = 'total',
   tiles = false,
   className,
 }: AreaChartCardProps = {}) {
   const localize = useTemplateCopy();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const gradientId = useId();
+  const reducedMotion = useReducedMotion();
 
   // Built-in demo periods when the host supplies neither ranges nor data.
   const demo = ranges === undefined && range === undefined && dataProp === undefined;
@@ -161,6 +171,7 @@ export function AreaChartCard({
   };
 
   const data = selected?.data ?? dataProp ?? DEFAULT_DATA;
+  useEffect(() => setActiveIndex(null), [data]);
   const series = selected?.series ?? seriesProp ?? DEFAULT_SERIES;
   const headline = selected?.headline ?? headlineProp;
   const delta = selected?.delta ?? deltaProp;
@@ -191,12 +202,14 @@ export function AreaChartCard({
   const legendItems = series.map((s, i) => ({
     label: s.label,
     color: tones[i].color,
-    value: format(hovering ? valueAt(s.key, activeIndex) : totalOf(s.key)),
+    value: hovering || legendSummary === 'latest'
+      ? (typeof data[hovering ? activeIndex : data.length - 1]?.[s.key] === 'number' ? format(Number(data[hovering ? activeIndex : data.length - 1][s.key])) : '—')
+      : format(totalOf(s.key)),
   }));
 
   return localize((
     <ChartCard className={cx(tiles && "h-auto", className)}>
-      <ChartHeader
+      {renderHeader ? renderHeader(hovering ? data[activeIndex] : undefined) : <ChartHeader
         label={headerLabel}
         value={headlineValue}
         format={format}
@@ -207,7 +220,7 @@ export function AreaChartCard({
         ranges={rangeList}
         rangeId={selectedId}
         onRangeChange={selectRange}
-      />
+      />}
 
       <div className={cx("min-h-0 w-full flex-1", tiles && "h-[196px] flex-none")}>
         <ResponsiveContainer width="100%" height="100%">
@@ -239,13 +252,14 @@ export function AreaChartCard({
               domain={isPercent ? [0, 1] : undefined}
               ticks={isPercent ? [0, 0.25, 0.5, 0.75, 1] : undefined}
               tickCount={4}
-              tickFormatter={isPercent ? (v: number) => `${Math.round(v * 100)}%` : compactNumber}
+              tickFormatter={axisFormat ?? (isPercent ? (v: number) => `${Math.round(v * 100)}%` : compactNumber)}
               tickLine={false}
               axisLine={false}
               tick={{ fontSize: 12, fill: "var(--color-text-tertiary)" }}
             />
             <XAxis
               dataKey="label"
+              tickFormatter={labelFormat}
               tickLine={false}
               axisLine={false}
               tickMargin={12}
@@ -268,8 +282,9 @@ export function AreaChartCard({
                 stroke={tones[i].activeColor}
                 strokeWidth={2}
                 fill={`url(#${gradientId}-${i})`}
-                isAnimationActive
+                isAnimationActive={!reducedMotion}
                 animationDuration={450}
+                dot={data.length === 1 ? { r: 3, fill: tones[i].activeColor } : false}
                 activeDot={{
                   r: 4,
                   fill: tones[i].activeColor,

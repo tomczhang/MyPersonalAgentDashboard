@@ -69,6 +69,10 @@ export const schemas = {
     positions: z.array(position).optional(), ammo: z.array(cashTier).optional(),
     series: z.array(z.object({ date, value: z.number().nonnegative(), changePct: z.number().finite().optional() }).strict()).optional(),
     seriesSummary: z.object({ changePct: z.number().finite() }).strict().optional(),
+    returnComparison: z.array(z.object({
+      date, income: z.number().finite().optional(),
+      portfolioPct: z.number().finite().optional(), sp500Pct: z.number().finite().optional(), nasdaq100Pct: z.number().finite().optional(),
+    }).strict()).refine(rows => new Set(rows.map(row => row.date.slice(0, 7))).size === rows.length, '每月最多一条收益记录').optional(),
     watchlist: z.array(watchlistItem).optional(),
     benchmarkSeries: z.object({
       benchmarkLabel: text,

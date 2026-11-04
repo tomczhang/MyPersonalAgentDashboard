@@ -2,7 +2,7 @@
 
 import { useTemplateCopy } from "@/components/foundations/template-copy/template-copy";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import {
   Bar,
   CartesianGrid,
@@ -95,6 +95,7 @@ export interface ComboChartCardProps {
    * one series the card would otherwise show.
    */
   caption?: (row?: ComboPoint) => string;
+  headerTrailing?: ReactNode;
   className?: string;
 }
 
@@ -186,6 +187,7 @@ export function ComboChartCard({
   tiles = false,
   headlineFrom = "bar",
   caption,
+  headerTrailing,
   className,
 }: ComboChartCardProps = {}) {
   const localize = useTemplateCopy();
@@ -252,6 +254,7 @@ export function ComboChartCard({
         ranges={rangeList}
         rangeId={selectedId}
         onRangeChange={selectRange}
+        trailing={headerTrailing}
       />
 
       <div className={cx("min-h-0 w-full flex-1", tiles && "h-[196px] flex-none")}>

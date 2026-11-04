@@ -23,7 +23,8 @@ for (const width of [1440, 390]) {
     if (width === 1440) {
       await page.getByRole('radio', { name: '虚构证券副账户', exact: true }).click();
       await page.getByRole('radio', { name: '仅框架内', exact: true }).click();
-      await page.getByRole('radio', { name: '1M', exact: true }).click();
+      await page.getByRole('button', { name: /收益时间范围/ }).click();
+      await page.getByRole('option', { name: '近1月', exact: true }).click();
       expect(await cells.allTextContents()).toEqual(before);
     }
     for (const theme of ['light', 'dark']) {
@@ -84,7 +85,7 @@ test('all signed bands have readable text in both themes, and empty slots hide t
   for (const data of [undefined, []]) {
     slot.monthlyReturns = data;
     await page.reload();
-    await expect(page.getByRole('heading', { name: '净值曲线', exact: true })).toBeVisible();
+    await expect(page.getByRole('region', { name: '收入与收益率', exact: true })).toBeVisible();
     await expect(card(page)).toHaveCount(0);
   }
 });

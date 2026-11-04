@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useReducedMotion } from 'motion/react';
 
 const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 
@@ -12,8 +13,14 @@ const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 export function useCountUp(target: number, duration = 320) {
   const [display, setDisplay] = useState(target);
   const fromRef = useRef(target);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
+    if (reducedMotion || duration <= 0) {
+      fromRef.current = target;
+      setDisplay(target);
+      return;
+    }
     const from = fromRef.current;
     if (from === target) return;
     const start = performance.now();
@@ -28,7 +35,12 @@ export function useCountUp(target: number, duration = 320) {
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [target, duration]);
+  }, [target, duration, reducedMotion]);
 
-  return display;
+  return reducedMotion ? target : display;
+}
+
+/** Keep the scale fixed across updates so switching between whole amounts and cents never jumps. */
+export function useCountUpPrecise(target: number, duration = 320) {
+  return useCountUp(Math.round(target * 100), duration) / 100;
 }

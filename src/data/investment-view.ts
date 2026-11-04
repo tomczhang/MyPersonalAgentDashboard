@@ -33,7 +33,7 @@ export function investmentView(data: Investment, accountId: string, frameworkOnl
   return { positions, ammo, total, cash, buckets, gap, complete, filtered };
 }
 
-export function filterSeries(series: Investment['series'], range: Range, asOf: string) {
+export function filterSeries<T extends { date: string }>(series: T[] | undefined, range: Range, asOf: string): T[] {
   const end = new Date(`${asOf}T00:00:00Z`);
   let start = '0000-01-01';
   if (range === 'YTD') start = `${asOf.slice(0, 4)}-01-01`;

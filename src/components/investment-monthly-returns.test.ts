@@ -35,9 +35,6 @@ describe('monthly returns matrix', () => {
     expect(html).not.toContain('−0.0%');
     expect(html.match(/data-tone="missing"[^>]*><bdi dir="ltr"><\/bdi><\/td>/g)).toHaveLength(8);
     expect(html).toContain('2026年4月，无数据');
-    expect(html).toContain('空格 = 无数据');
-    expect(html).toContain('界面不推算');
-    expect(html).toContain('不随账户 / 框架筛选');
     expect(html.match(/scope="col"/g)).toHaveLength(13);
     expect(html.match(/scope="row"/g)).toHaveLength(1);
   });

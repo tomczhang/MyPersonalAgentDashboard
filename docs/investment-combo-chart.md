@@ -1,5 +1,7 @@
 # 第六单：官方净值组合图（2026-11-03）
 
+> 历史实现记录。首屏现已改为 AreaChartCard 收入与收益率对比，当前数据口径和交互见 [收入与收益率](./investment-return-comparison.md)。下文的组件校验、映射和验证结果仅对应当时版本。
+
 通过 `npx -y @collectui/bdui@latest add combo-chart-card --key "$BDUI_KEY"` 安装。安装命令只引用环境变量，仓库不保存密钥。
 
 官方文件原样保留：

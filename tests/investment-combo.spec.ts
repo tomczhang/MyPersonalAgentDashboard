@@ -1,108 +1,93 @@
-import { test, expect, type Page } from '@playwright/test';
-import example from '../data/examples/investment.json' with { type: 'json' };
+import { test, expect, type Locator, type Page } from '@playwright/test';
 
 test.beforeEach(async ({ page }) => {
   await page.route('**/api/data/*', route => route.fulfill({ json: { origin: 'example' } }));
 });
+const card = (page: Page) => page.getByRole('region', { name: '收入与收益率', exact: true });
+const ring = (page: Page) => page.getByRole('region', { name: '资产分布', exact: true });
 
-const card = (page: Page) => page.locator('section').filter({ has: page.getByRole('heading', { name: '净值曲线', exact: true }) }).first();
-const chart = (page: Page) => card(page).locator('section');
-async function open(page: Page) {
+async function slicePoint(slice: Locator) {
+  await slice.scrollIntoViewIfNeeded();
+  let point: { x: number; y: number } | null = null;
+  await expect.poll(async () => {
+    point = await slice.locator('path').first().evaluate(node => {
+      const bounds = node.getBoundingClientRect();
+      for (let x = bounds.x + 5; x < bounds.right; x += 5) {
+        for (let y = bounds.y + 5; y < bounds.bottom; y += 5) {
+          if (document.elementFromPoint(x, y) === node) return { x, y };
+        }
+      }
+      return null;
+    });
+    return point !== null;
+  }).toBe(true);
+  return point!;
+}
+
+test('area comparison shows annual income, monthly hover and all four ranges', async ({ page }) => {
   await page.goto('/#investment');
-  await expect(card(page).locator('.recharts-bar-rectangle')).toHaveCount(13);
-  await expect(chart(page)).toContainText('US$500,000');
-  // The registry owns its 450ms Recharts entrance animation; capture its settled state.
-  await page.waitForTimeout(800);
-}
-async function hoverBar(page: Page, index: number) {
-  await card(page).locator('.recharts-wrapper').scrollIntoViewIfNeeded();
-  await page.waitForTimeout(800);
-  const bar = card(page).locator('.recharts-bar-rectangle path').nth(index);
-  await expect(bar).toBeVisible();
-  const box = await bar.boundingBox();
-  if (!box) throw new Error('Missing bar geometry');
-  // Recharts handles pointer movement on the chart overlay, above the bar path.
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-}
-async function hoverFirst(page: Page, value = 'US$400,000') {
-  await hoverBar(page, 0);
-  await expect(chart(page)).toContainText(value);
-}
+  await expect(card(page).locator('.recharts-area-curve')).toHaveCount(3);
+  await expect(card(page).getByRole('button', { name: /收益时间范围/ })).toContainText('本年至今');
+  await expect(card(page)).toContainText('US$40,000.00');
+  const tick = card(page).getByText('1月', { exact: true });
+  const box = await tick.boundingBox();
+  if (!box) throw new Error('Missing first month tick');
+  await page.mouse.move(box.x + box.width / 2, box.y - 50);
+  await expect(card(page)).toContainText('2026年01月收入');
+  await expect(card(page)).toContainText('US$5,000.00');
+  await expect(card(page)).toContainText('1.2%');
+  await expect(card(page)).toContainText('1.8%');
+  await page.mouse.move(0, 0);
+  await expect(card(page)).toContainText('2026 收入');
+  await expect(card(page)).toContainText('US$40,000.00');
+  for (const label of ['近1月', '近1年', '全部', '本年至今']) {
+    await card(page).getByRole('button', { name: /收益时间范围/ }).click();
+    await page.getByRole('option', { name: label, exact: true }).click();
+    await expect(page.getByRole('listbox', { name: '收益时间范围', exact: true })).toBeHidden();
+    await expect(card(page).getByRole('button', { name: /收益时间范围/ })).toContainText(label);
+    await expect(card(page)).toContainText('US$40,000.00');
+  }
+});
 
-test('official hover readout, dimming, pulse and range/account scope', async ({ page }) => {
-  const errors: string[] = [];
-  page.on('pageerror', error => errors.push(error.message));
-  await open(page);
-  await expect(chart(page)).toContainText('+15.4%');
-  await page.screenshot({ path: 'test-results/combo-1440-light.png', fullPage: true });
-  await hoverFirst(page);
-  await expect(chart(page)).toContainText('2025-11-01 · 收益率 0%');
-  await expect(card(page).locator('path[opacity="0.3"]')).toHaveCount(12);
-  await expect(card(page).locator('animate[attributeName="r"]')).toHaveCount(1);
-  await page.screenshot({ path: 'test-results/combo-1440-hover.png' });
-  await page.mouse.move(0, 0);
-  await expect(chart(page)).toContainText('US$500,000');
+test('ring slices highlight on hover, show name and values, and support keyboard focus without a legend', async ({ page }) => {
+  await page.goto('/#investment');
+  const slice = ring(page).getByRole('button', { name: '虚构稳健资产 30%', exact: true });
+  await expect(ring(page).locator('path[fill="transparent"]')).toHaveCount(5);
+  // A crescent's bounding-box centre is in the empty hole. Hover its stationary target.
+  await expect(slice).toBeVisible();
+  await expect(ring(page).getByRole('list')).toHaveCount(0);
+  const point = await slicePoint(slice);
+  await page.mouse.move(point.x, point.y);
+  await expect(slice).toHaveAttribute('aria-pressed', 'true');
+  await expect(ring(page).locator('[aria-live]')).toHaveText('虚构稳健资产：30% · US$150,000.00');
+  await expect(ring(page).locator('[data-distribution-readout] [aria-hidden="true"]')).toHaveText('虚构稳健资产30%US$150,000.00');
+  await expect.poll(() => slice.locator('g').evaluate(node => getComputedStyle(node).transform)).not.toBe('matrix(1, 0, 0, 1, 0, 0)');
+  await page.getByRole('heading', { name: '股票 Dashboard', exact: true }).hover();
+  await expect(ring(page).locator('[aria-live]')).toContainText('总资产');
+  await slice.focus();
+  await expect(ring(page).locator('[aria-live]')).toHaveText('虚构稳健资产：30% · US$150,000.00');
+  await slice.press('Escape');
+  await expect(ring(page).locator('[aria-live]')).toContainText('总资产');
+  const cash = await slicePoint(ring(page).getByRole('button', { name: '现金 20%', exact: true }));
+  await page.mouse.move(cash.x, cash.y);
+  await expect(ring(page).locator('[aria-live]')).toHaveText('现金：20% · US$100,000.00');
+  await expect(ring(page).locator('[data-distribution-readout] [aria-hidden="true"]')).toHaveText('现金20%US$100,000.00');
   await page.getByRole('radio', { name: '虚构证券副账户', exact: true }).click();
-  await page.getByRole('radio', { name: '仅框架内', exact: true }).click();
-  await expect(chart(page)).toContainText('US$500,000');
-  await expect(card(page).locator('.recharts-bar-rectangle')).toHaveCount(13);
-  await card(page).getByRole('radio', { name: '1M', exact: true }).click();
-  await expect(card(page).locator('.recharts-bar-rectangle')).toHaveCount(2);
-  await hoverFirst(page, 'US$490,000');
-  await expect(chart(page)).toContainText('2026-10-01 · 收益率 0.7%');
-  await page.mouse.move(0, 0);
+  await expect(ring(page).locator('[aria-live]')).toHaveText('总资产：100% · US$200,000.00');
+  await expect(ring(page).getByRole('button', { name: '虚构稳健资产 30%' })).toHaveCount(0);
+});
+
+test('mobile reduced-motion view has three areas, usable ring and no horizontal overflow', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/#investment');
+  await expect(card(page).locator('.recharts-area-curve')).toHaveCount(3);
+  await expect(ring(page).locator('path[fill="transparent"]')).toHaveCount(5);
+  const cash = await slicePoint(ring(page).getByRole('button', { name: '现金 20%', exact: true }));
+  await page.mouse.click(cash.x, cash.y);
+  await expect(ring(page).locator('[aria-live]')).toHaveText('现金：20% · US$100,000.00');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
   await page.getByRole('button', { name: '切换深浅主题' }).filter({ visible: true }).click();
   await expect(page.locator('html')).toHaveClass(/dark/);
-  await page.screenshot({ path: 'test-results/combo-1440-dark.png', fullPage: true });
-  expect(errors).toEqual([]);
-});
-
-test('390px light/dark layout and hover without horizontal overflow', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await open(page);
-  await card(page).scrollIntoViewIfNeeded();
-  await page.screenshot({ path: 'test-results/combo-390-light.png', fullPage: true });
-  await card(page).screenshot({ path: 'test-results/combo-390-card-light.png' });
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
-  await hoverFirst(page);
-  await expect(chart(page)).toContainText('2025-11-01 · 收益率 0%');
-  await page.screenshot({ path: 'test-results/combo-390-hover.png' });
-  await page.mouse.move(0, 0);
-  await page.getByRole('button', { name: '切换深浅主题' }).filter({ visible: true }).click();
-  await card(page).scrollIntoViewIfNeeded();
-  await page.screenshot({ path: 'test-results/combo-390-dark.png', fullPage: true });
-  await card(page).screenshot({ path: 'test-results/combo-390-card-dark.png' });
-  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
-});
-
-test('legacy and partial rates stay missing; missing series uses existing empty state', async ({ page }) => {
-  const slot = structuredClone(example) as Omit<typeof example, 'series' | 'seriesSummary'> & { series?: { date: string; value: number; changePct?: number }[]; seriesSummary?: { changePct: number } };
-  await page.route('**/api/data/investment', route => {
-    const fixture = JSON.parse(JSON.stringify(slot).replaceAll('示例数据', '虚构浏览器测试'));
-    return route.fulfill({ json: { origin: 'local', data: { ...fixture, meta: { ...fixture.meta, status: 'draft' } } } });
-  });
-  delete slot.seriesSummary;
-  slot.series?.forEach(point => { delete point.changePct; });
-  await open(page);
-  await expect(card(page).locator('.recharts-line-curve')).toHaveCount(0);
-  await expect(card(page)).toContainText('槽位暂无收益率数据，仅显示净值条形。');
-  await hoverFirst(page);
-  await expect(chart(page)).toContainText('收益率 —');
-  await expect(card(page)).toContainText('区间涨跌：—');
-  slot.series![0].changePct = -2;
-  slot.series![2].changePct = 0;
-  await page.reload();
-  await expect(card(page)).toContainText('收益率 · 平均');
-  await expect(card(page)).toContainText('-1%');
-  await hoverFirst(page);
-  await expect(chart(page)).toContainText('收益率 -2%');
-  await hoverBar(page, 1);
-  await expect(chart(page)).toContainText('收益率 —');
-  delete slot.series;
-  await page.reload();
-  await expect(card(page)).toContainText('槽位暂无序列数据');
-  await expect(card(page).locator('.recharts-wrapper')).toHaveCount(0);
-  slot.series = [{ date: '2020-01-01', value: 100 }];
-  await page.reload();
-  await expect(card(page)).toContainText('所选范围暂无序列数据');
 });

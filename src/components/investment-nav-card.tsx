@@ -1,60 +1,79 @@
 "use client";
-import { ComboChartCard, type ComboPoint } from '@/components/application/charts/combo-chart-card';
-import { ChartStatTiles } from '@/components/application/charts/chart-card';
-import { SegmentedControl, SegmentedControlItem } from '@/components/base/segmented-control/segmented-control';
-import { Panel } from '@/components/module-content';
-import { money, percent, type Investment, type Range } from '@/data/investment-view';
+import { useMemo } from 'react';
+import { RiCalendarLine } from '@remixicon/react';
+import { AreaChartCard, type AreaPoint } from '@/components/application/charts/area-chart-card';
+import { ChartHeader, describeDelta } from '@/components/application/charts/chart-card';
+import { Select, SelectItem } from '@/components/base/select/select';
+import { filterSeries, money, percent, type Investment, type Range } from '@/data/investment-view';
 
-const navFormat = (value: number) => new Intl.NumberFormat('zh-CN', {
-  style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 2,
-}).format(value);
+const ranges = [
+  { id: 'YTD', label: '本年至今' }, { id: '1M', label: '近1月' },
+  { id: '1Y', label: '近1年' }, { id: 'Max', label: '全部' },
+];
+const series = [
+  { key: 'portfolioPct', label: '我的累计收益率', color: 'var(--color-chart-2)', activeColor: 'var(--color-chart-2-active)' },
+  { key: 'sp500Pct', label: '标普 500', color: 'var(--color-chart-4)', activeColor: 'var(--color-chart-4-active)' },
+  { key: 'nasdaq100Pct', label: '纳指 100', color: 'var(--color-chart-5)', activeColor: 'var(--color-chart-5-active)' },
+];
 
-// Adapt slots only. Missing returns stay absent, never inferred from NAV or filled with zero.
-export function investmentComboData(data: NonNullable<Investment['series']>) {
-  const points: ComboPoint[] = data.map(({ date, value, changePct }) => ({
-    label: date, value, ...(changePct === undefined ? {} : { changePct }),
+export function investmentReturnData(data: Investment, range: Range): AreaPoint[] {
+  // Legacy monthly percentages are usable; NAV changes and unnamed benchmarks are not.
+  const rows = data.returnComparison ?? (data.monthlyReturns ?? []).flatMap(row => row.months.flatMap((value, index) => {
+    const date = new Date(Date.UTC(row.year, index + 1, 0)).toISOString().slice(0, 10);
+    return [{ date, ...(value === null ? {} : { portfolioPct: value }) }];
   }));
-  const rates = data.flatMap(point => point.changePct === undefined ? [] : [point.changePct]);
-  return { points, latest: data.at(-1), average: rates.length ? rates.reduce((sum, rate) => sum + rate, 0) / rates.length : undefined };
+  const factors: Record<string, number | undefined> = Object.fromEntries(series.map(item => [item.key, 1]));
+  let previousMonth: number | undefined;
+  return filterSeries(rows, range, data.meta.asOf).map(row => {
+    const point: AreaPoint = { ...row, label: row.date };
+    const month = Number(row.date.slice(0, 4)) * 12 + Number(row.date.slice(5, 7));
+    for (const { key } of series) {
+      const rate = point[key];
+      // A missing month breaks the cumulative chain; never treat unknown returns as zero.
+      if (typeof rate !== 'number' || (previousMonth !== undefined && month !== previousMonth + 1)) factors[key] = undefined;
+      const factor = factors[key];
+      if (factor === undefined) delete point[key];
+      else {
+        factors[key] = factor * (1 + Number(rate) / 100);
+        point[key] = (factors[key]! - 1) * 100;
+      }
+    }
+    previousMonth = month;
+    return point;
+  });
 }
 
-export function InvestmentNavCard({ data, summary, range, onRangeChange, empty, asOf }: {
-  data: NonNullable<Investment['series']>; summary?: Investment['seriesSummary'];
-  range: Range; onRangeChange: (range: Range) => void; empty: boolean; asOf: string;
+export function InvestmentNavCard({ data, range, onRangeChange }: {
+  data: Investment; range: Range; onRangeChange: (range: Range) => void;
 }) {
-  const { points, latest, average } = investmentComboData(data);
-  return <Panel title="净值曲线">
-    <div className="flex flex-wrap items-center justify-between gap-3">
-      <p className="text-caption-1-medium text-text-primary/65">全组合 · USD · 截至 {asOf} · 不随账户 / 框架筛选</p>
-      <SegmentedControl aria-label="净值日期范围" selectedKeys={[range]} onSelectionChange={keys => onRangeChange([...keys][0] as Range)}>
-        {(['1M', 'YTD', '1Y', 'Max'] as const).map(id => <SegmentedControlItem key={id} id={id} className="font-latin">{id}</SegmentedControlItem>)}
-      </SegmentedControl>
-    </div>
-    {latest ? <div className="mt-4 flex flex-col gap-4">
-      <ComboChartCard
-        key={range}
-        title="净值 · 最新"
-        data={points}
-        bar={{ key: 'value', label: '净值', format: navFormat, axisFormat: value => `${value / 1000}k`, color: 'var(--color-chart-2)', activeColor: 'var(--color-chart-2-active)' }}
-        line={{ key: 'changePct', label: '收益率', format: percent, axisFormat: average === undefined ? () => '' : percent, color: 'var(--color-chart-4)', activeColor: 'var(--color-chart-4-active)' }}
-        headline={latest.value}
-        delta={summary === undefined ? undefined : summary.changePct / 100}
-        caption={row => row ? `收益率 ${typeof row.changePct === 'number' ? percent(row.changePct) : '—'}` : latest.date}
-        tiles={false}
-        className="rounded-3xl border border-border-button-default [&_.text-text-tertiary]:text-text-primary/65 [&_.text-text-secondary]:text-text-primary/75 [&_.recharts-cartesian-axis-tick-value]:fill-text-primary/65 [&_.recharts-cartesian-axis-tick-value]:text-caption-1-regular"
-      />
-      {/* Official tiles sum NAV snapshots and count missing rates as zero. Use the shared
-          presentation component with correct summaries; no external hover callback exists. */}
-      <ChartStatTiles className="mx-0 mb-0" items={[
-        { label: '净值 · 最新', value: money(latest.value), color: 'var(--color-chart-2)' },
-        { label: '收益率 · 平均', value: percent(average), color: 'var(--color-chart-4)' },
-      ]} />
-      <div className="flex flex-col gap-1 text-caption-1-medium text-text-primary/65">
-        <p>左轴：净值 USD；右轴：收益率 % · {data.length} 个快照点。净值受资金流入流出影响，不代表收益率。</p>
-        <p>区间涨跌：{percent(summary?.changePct)}（填充方提供的完整序列区间，不随日期筛选重算）。</p>
-        <p>{average === undefined ? '槽位暂无收益率数据，仅显示净值条形。' : '收益率平均为所选范围已填 changePct 的简单平均，缺失值不参与；不代表区间收益。'}</p>
-        <p>悬停查看卡头当期净值与收益率；下方图例保留最新 / 平均汇总。</p>
-      </div>
-    </div> : <div role="status" className="flex min-h-72 items-center justify-center text-body-regular text-text-primary/65">{empty ? '槽位暂无序列数据' : '所选范围暂无序列数据'}</div>}
-  </Panel>;
+  const points = useMemo(() => investmentReturnData(data, range), [data, range]);
+  const year = data.meta.asOf.slice(0, 4);
+  const annual = data.performanceByYear?.[year];
+  const header = (point?: AreaPoint) => {
+    const income = point ? (typeof point.income === 'number' ? point.income : undefined) : annual?.totalReturn;
+    const rate = point ? (typeof point.portfolioPct === 'number' ? point.portfolioPct : undefined) : annual?.twrPct;
+    return <ChartHeader
+      label={point ? `${point.label.slice(0, 7).replace('-', '年')}月收入` : `${year} 收入`}
+      value={income} format={money} valueText={income === undefined ? '—' : undefined}
+      delta={rate === undefined ? undefined : describeDelta(rate / 100)}
+      fadeKey={point?.label ?? 'annual'}
+      trailing={<Select aria-label="收益时间范围" size="sm" selectedKey={range} onSelectionChange={id => onRangeChange(id as Range)}
+        className="shrink-0" triggerClassName="h-8" popoverClassName="w-48 transition-none"
+        renderValue={<><RiCalendarLine aria-hidden className="size-4 text-text-secondary" /><span>{ranges.find(item => item.id === range)?.label}</span></>}>
+        {ranges.map(item => <SelectItem key={item.id} id={item.id}>{item.label}</SelectItem>)}
+      </Select>}
+      className="flex-wrap [&>div:first-child]:min-w-48"
+    />;
+  };
+  const missing = series.filter(item => !points.some(point => typeof point[item.key] === 'number'));
+  return <section aria-label="收入与收益率" className="flex min-w-0 flex-col gap-3 rounded-3xl bg-background-secondary-default p-5 sm:p-6">
+    {points.length > 0 ? <AreaChartCard
+      variant="overlap" data={points} series={series}
+      format={percent} axisFormat={percent} legendSummary="latest"
+      labelFormat={label => range === 'Max' || range === '1Y' ? label.slice(0, 7) : `${Number(label.slice(5, 7))}月`}
+      renderHeader={header}
+      className="h-96 rounded-none p-0 sm:h-112 [&_.recharts-cartesian-axis-tick-value]:text-caption-1-regular"
+    /> : <>{header()}<p role="status" className="flex min-h-72 items-center justify-center text-body-regular text-text-tertiary">所选范围暂无收益数据</p></>}
+    {points.length > 0 && missing.length > 0 && <p className="text-caption-1-regular text-text-tertiary">暂无{missing.map(item => item.label).join('、')}数据</p>}
+  </section>;
 }

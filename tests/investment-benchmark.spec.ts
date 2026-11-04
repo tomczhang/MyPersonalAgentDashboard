@@ -53,7 +53,8 @@ for (const width of [1440, 390]) {
     if (width === 1440) {
       await page.getByRole('radio', { name: '虚构证券副账户', exact: true }).click();
       await page.getByRole('radio', { name: '仅框架内', exact: true }).click();
-      await page.getByRole('radio', { name: '1M', exact: true }).click();
+      await page.getByRole('button', { name: /收益时间范围/ }).click();
+      await page.getByRole('option', { name: '近1月', exact: true }).click();
       await card(page).scrollIntoViewIfNeeded();
       await page.mouse.move(0, 0);
       await expect(headline(page)).toHaveText('120');
@@ -82,7 +83,7 @@ test('missing, empty and single-point slots hide the complete card; two points r
     slot.benchmarkSeries = points ? { benchmarkLabel: '虚构替代基准', points } : undefined;
     await page.goto('/#investment');
     await page.reload();
-    await expect(page.getByRole('heading', { name: '净值曲线', exact: true })).toBeVisible();
+    await expect(page.getByRole('region', { name: '收入与收益率', exact: true })).toBeVisible();
     await expect(page.getByRole('heading', { name: '基准对比', exact: true })).toHaveCount(points?.length === 2 ? 1 : 0);
   }
   await expect(chart(page)).toContainText('虚构替代基准');

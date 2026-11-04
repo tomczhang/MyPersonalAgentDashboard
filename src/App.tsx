@@ -2,7 +2,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { RiArrowRightUpLine, RiRefreshLine, RiShieldCheckLine } from '@remixicon/react';
 import { DashboardShell } from '@/components/application/dashboard/dashboard-shell';
-import { ThemeToggle } from '@/components/application/theme/theme-toggle';
 import { Button, ButtonLink } from '@/components/base/buttons/button';
 import { Select, SelectItem } from '@/components/base/select/select';
 import { Metadata, ModuleContent, Panel, Provenance } from '@/components/module-content';
@@ -42,8 +41,8 @@ export function App() {
   });
   return <DashboardShell items={navigation} selected={page}>
     <header className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-center justify-between gap-3"><p className="text-caption-1-semibold text-text-primary/65"><bdi dir="ltr">MUSE BOARD</bdi> / {page === 'overview' ? '总览' : moduleInfo[page].title}</p><div className="flex gap-2"><span className="lg:hidden"><ThemeToggle /></span><Button variant="secondary" leadingIcon={RiRefreshLine} disabled={loading} onClick={() => void refresh()}>{loading ? '读取中…' : '刷新数据'}</Button></div></div>
-      <div><h1 className="text-title-1-medium text-text-primary">{title}</h1><p className="mt-2 text-body-regular text-text-primary/75">{page === 'overview' ? '把重要的事放在一起，让每一个数字都有出处。' : `${moduleInfo[page].subtitle} · ${moduleInfo[page].cadence}`}</p></div>
+      <div className="flex flex-wrap items-center justify-between gap-3"><p className="text-caption-1-semibold text-text-primary/65"><bdi dir="ltr">MUSE BOARD</bdi> / {page === 'overview' ? '总览' : moduleInfo[page].title}</p><Button variant="secondary" leadingIcon={RiRefreshLine} disabled={loading} onClick={() => void refresh()}>{loading ? '读取中…' : '刷新数据'}</Button></div>
+      <div><h1 className="text-title-1-medium text-text-primary">{title}</h1>{page !== 'investment' && <p className="mt-2 text-body-regular text-text-primary/75">{page === 'overview' ? '把重要的事放在一起，让每一个数字都有出处。' : `${moduleInfo[page].subtitle} · ${moduleInfo[page].cadence}`}</p>}</div>
     </header>
     {loading ? <Panel title="正在读取数据"><p role="status" className="text-body-regular text-text-primary/75">正在检查本地槽位与示例数据…</p></Panel> : page === 'overview' ? <>
       <section className="flex flex-col gap-5 rounded-3xl border border-border-button-default bg-background-secondary-default p-6 sm:flex-row sm:items-center sm:justify-between">
@@ -69,8 +68,7 @@ export function App() {
       <section id="filling-help"><Panel title="让你的 Muse 来填数据"><div className="flex flex-col gap-3 text-body-regular text-text-primary/75"><p>请让你的 PA agent 阅读仓库中的 <code dir="ltr">docs/FILLING_GUIDE.md</code> 和 <code dir="ltr">data/CONTRACT.md</code>，按模块收集信息并创建待确认草稿。</p><p>真实数据仅存放在 <code dir="ltr">data/local/</code>。你确认后，Muse 才能将状态改为 confirmed；刷新页面即可读取新文件。</p></div></Panel></section>
     </> : slots[page]?.state === 'ready' ? <PageContent loaded={(slots[page] as Extract<Slot, { state: 'ready' }>).loaded} /> : <ErrorCard id={page} />}
     <footer className="flex flex-col gap-2 border-t border-separator-border py-4 text-caption-1-medium text-text-primary/65">
-      {page === 'investment' && <p>组合总值 = 当前持仓市值 + 当前现金；持仓表权重以此总值为分母。集中度为前三大持仓市值占当前视图持仓总市值的比例，不含现金。仅框架内保留已标记的现金。筛选视图按同一目标比例重算配置缺口。独立观察账户不计入。</p>}
-      <p>Muse Board · 公开模板仅包含虚构示例。数据状态、日期与来源以各槽位标注为准。</p>
+      <p>{page === 'investment' ? 'Muse Board' : 'Muse Board · 公开模板仅包含虚构示例。数据状态、日期与来源以各槽位标注为准。'}</p>
     </footer>
   </DashboardShell>;
 }

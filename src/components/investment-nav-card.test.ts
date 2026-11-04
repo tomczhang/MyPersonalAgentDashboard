@@ -3,37 +3,76 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import example from '../../data/examples/investment.json';
 import { parseModule } from '@/data/schema';
-import { InvestmentNavCard, investmentComboData } from '@/components/investment-nav-card';
+import { InvestmentNavCard, investmentReturnData } from '@/components/investment-nav-card';
 import { DirectionProvider } from '@/components/foundations/direction/direction';
 
-describe('official combo chart slot adapter', () => {
-  it('preserves supplied returns independently of NAV, including negative and zero rates', () => {
-    const series = [{ date: '2026-10-01', value: 100, changePct: -3 }, { date: '2026-10-15', value: 400 }, { date: '2026-11-01', value: 900, changePct: 0 }];
-    const mapped = investmentComboData(series);
-    expect(mapped.points).toEqual([{ label: '2026-10-01', value: 100, changePct: -3 }, { label: '2026-10-15', value: 400 }, { label: '2026-11-01', value: 900, changePct: 0 }]);
-    expect(mapped.latest?.value).toBe(900);
-    expect(mapped.average).toBe(-1.5);
-    expect(investmentComboData([{ date: '2026-11-01', value: 100 }]).average).toBeUndefined();
-    expect(investmentComboData([]).latest).toBeUndefined();
+describe('cumulative investment return comparison', () => {
+  it('filters by snapshot date and retains negative, zero and missing values', () => {
+    const data = parseModule('investment', example);
+    data.returnComparison = [
+      { date: '2025-12-31', income: 800, portfolioPct: 1 },
+      { date: '2026-01-31', income: -300, portfolioPct: -2, sp500Pct: 0 },
+      { date: '2026-10-31', income: 0, portfolioPct: 0, nasdaq100Pct: -1 },
+      { date: '2026-11-30', income: 999, portfolioPct: 99 },
+    ];
+    expect(investmentReturnData(data, 'YTD').map(row => row.income)).toEqual([-300, 0]);
+    const recent = investmentReturnData(data, '1M');
+    expect(recent).toHaveLength(1);
+    expect(recent[0]).toMatchObject({ income: 0, portfolioPct: 0 });
+    expect(recent[0].nasdaq100Pct).toBeCloseTo(-1);
+    expect(recent[0].sp500Pct).toBeUndefined();
+    expect(investmentReturnData(data, 'Max')).toHaveLength(3);
   });
-  it('accepts old slots and rejects invalid returns without requiring the optional extension', () => {
-    const slot = parseModule('investment', example);
-    delete slot.seriesSummary;
-    slot.series?.forEach(point => { delete point.changePct; });
-    expect(parseModule('investment', slot).series?.[0].changePct).toBeUndefined();
-    for (const value of [NaN, Infinity, '4', null]) {
-      expect(() => parseModule('investment', { ...slot, seriesSummary: { changePct: value } })).toThrow();
-      expect(() => parseModule('investment', { ...slot, series: [{ date: '2026-11-01', value: 100, changePct: value }] })).toThrow();
+  it('uses annual supplied income and TWR without summing percentages or using NAV', () => {
+    const data = parseModule('investment', example);
+    data.performanceByYear = { '2026': { totalReturn: 12345.67, twrPct: -7.3 } };
+    const html = renderToStaticMarkup(createElement(DirectionProvider, { locale: 'zh-CN', children: createElement(InvestmentNavCard, { data, range: 'YTD', onRangeChange: () => {} }) }));
+    expect(html).toContain('12,345.67');
+    expect(html).toContain('-7.3%');
+    expect(html).toContain('本年至今');
+    expect(html).not.toContain('500,000');
+    expect(html).toContain('标普 500');
+    expect(html).toContain('纳指 100');
+  });
+  it('accepts legacy monthly data but never invents benchmark or income values', () => {
+    const data = parseModule('investment', example);
+    delete data.returnComparison;
+    const points = investmentReturnData(data, 'YTD');
+    expect(points).toHaveLength(10);
+    expect(points[2].portfolioPct).toBeCloseTo(0.9596);
+    expect(points.every(row => row.income === undefined && row.sp500Pct === undefined && row.nasdaq100Pct === undefined)).toBe(true);
+    delete data.monthlyReturns;
+    expect(investmentReturnData(data, 'YTD')).toEqual([]);
+  });
+  it('compounds gains and losses within the range, and stops each series at missing data', () => {
+    const data = parseModule('investment', example);
+    data.meta.asOf = '2026-04-01';
+    data.returnComparison = [
+      { date: '2025-12-31', portfolioPct: 50 },
+      { date: '2026-01-31', income: 100, portfolioPct: 10, sp500Pct: 2, nasdaq100Pct: 1 },
+      { date: '2026-02-28', income: -100, portfolioPct: -10, sp500Pct: 0 },
+      { date: '2026-03-31', income: 0, portfolioPct: 0, sp500Pct: 3, nasdaq100Pct: 4 },
+    ];
+    const points = investmentReturnData(data, 'YTD');
+    expect(points[0].portfolioPct).toBeCloseTo(10);
+    expect(points[1].portfolioPct).toBeCloseTo(-1);
+    expect(points[2].portfolioPct).toBeCloseTo(-1);
+    expect(points[2].sp500Pct).toBeCloseTo(5.06);
+    expect(points[2].nasdaq100Pct).toBeUndefined();
+    expect(points.map(point => point.income)).toEqual([100, -100, 0]);
+    const recent = investmentReturnData(data, '1M');
+    expect(recent).toHaveLength(1);
+    expect(recent[0].portfolioPct).toBe(0);
+    expect(recent[0].nasdaq100Pct).toBeCloseTo(4);
+    data.returnComparison.splice(2, 1);
+    expect(investmentReturnData(data, 'YTD')[1].portfolioPct).toBeUndefined();
+  });
+  it('rejects duplicate months and non-finite rates or amounts', () => {
+    const data = parseModule('investment', example);
+    for (const invalid of [NaN, Infinity, '4', null]) {
+      expect(() => parseModule('investment', { ...data, returnComparison: [{ date: '2026-01-31', income: invalid }] })).toThrow();
+      expect(() => parseModule('investment', { ...data, returnComparison: [{ date: '2026-01-31', sp500Pct: invalid }] })).toThrow();
     }
-  });
-  it('reads the supplied summary chip and latest NAV, never sums snapshots', () => {
-    const data = [{ date: '2026-10-01', value: 100, changePct: -3 }, { date: '2026-11-01', value: 900, changePct: 0 }];
-    const render = (summary?: { changePct: number }) => renderToStaticMarkup(createElement(DirectionProvider, { locale: 'zh-CN', children: createElement(InvestmentNavCard, { data, summary, range: '1M', onRangeChange: () => {}, empty: false, asOf: '2026-11-01' }) }));
-    expect(render({ changePct: -7.3 })).toContain('-7.3%');
-    expect(render({ changePct: 0 })).toContain('0.0%');
-    expect(render()).toContain('区间涨跌：—');
-    expect(render()).toContain('900.00');
-    expect(render()).not.toContain('1,000');
-    expect(render()).toContain('-1.5%');
+    expect(() => parseModule('investment', { ...data, returnComparison: [{ date: '2026-01-01' }, { date: '2026-01-31' }] })).toThrow();
   });
 });
