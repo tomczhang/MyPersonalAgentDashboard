@@ -70,6 +70,7 @@ export interface AgentLimitsCardProps {
     breakdownLabel?: string;
     showFreeSpace?: boolean;
     limitsTitle?: ReactNode;
+    footer?: ReactNode;
   };
   /** Plan name shown after "Plan usage limits ·". */
   plan?: string;
@@ -372,7 +373,7 @@ export function AgentLimitsCard({
         )}
       </div>}
 
-      <div className="flex flex-col gap-3 pt-1">
+      {presentation?.footer ?? <div className="flex flex-col gap-3 pt-1">
         {limits.map((limit, index) => {
           const pct = Math.round(Math.max(0, Math.min(1, limit.used ?? 0)) * 100);
           return (
@@ -393,7 +394,7 @@ export function AgentLimitsCard({
             </div>
           );
         })}
-      </div>
+      </div>}
     </section>
   ));
 }

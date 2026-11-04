@@ -99,6 +99,7 @@ export function ChartHeader({
   valueText,
   format = formatNumber,
   delta,
+  deltaClassName,
   hovering = false,
   fadeKey,
   range,
@@ -119,6 +120,8 @@ export function ChartHeader({
   /** Delta chip beside the headline; hidden while `hovering` so the hovered
    *  value stands alone, matching the other chart cards. */
   delta?: { label: string; color: DeltaColor };
+  /** Optional semantic styling override for the delta chip. */
+  deltaClassName?: string;
   hovering?: boolean;
   /** Changing this key restarts the headline's fade, e.g. `String(activeIndex)`. */
   fadeKey?: string;
@@ -153,6 +156,7 @@ export function ChartHeader({
                 delta.color === "lime" && "bg-chart-2/20 text-text-primary",
                 delta.color === "rose" && "bg-chart-3/20 text-text-primary",
                 hovering && "invisible",
+                deltaClassName,
               )}>
                 {delta.label}
               </Chip>

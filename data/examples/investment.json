@@ -347,6 +347,12 @@
       "symbol": "DEMO-A",
       "name": "虚构稳健资产",
       "assetType": "债券基金",
+      "riskReturn": {
+        "YTD": { "volatilityPct": 8.5, "returnPct": 5.2 },
+        "1M": { "volatilityPct": 6.2, "returnPct": 0.7 },
+        "1Y": { "volatilityPct": 9.1, "returnPct": 6.8 },
+        "Max": { "volatilityPct": 10.4, "returnPct": 25 }
+      },
       "sector": "债券",
       "currency": "USD",
       "qty": {
@@ -381,6 +387,12 @@
       "symbol": "DEMO-B",
       "name": "虚构成长资产",
       "assetType": "股票",
+      "riskReturn": {
+        "YTD": { "volatilityPct": 24.6, "returnPct": -8.4 },
+        "1M": { "volatilityPct": 21.1, "returnPct": -2.1 },
+        "1Y": { "volatilityPct": 26.3, "returnPct": -6.2 },
+        "Max": { "volatilityPct": 28.8, "returnPct": -10 }
+      },
       "sector": "科技",
       "currency": "USD",
       "qty": {
@@ -415,6 +427,12 @@
       "symbol": "DEMO-C",
       "name": "虚构创新资产",
       "assetType": "股票",
+      "riskReturn": {
+        "YTD": { "volatilityPct": 38.4, "returnPct": 14.8 },
+        "1M": { "volatilityPct": 32.7, "returnPct": 3.6 },
+        "1Y": { "volatilityPct": 40.2, "returnPct": 18.6 },
+        "Max": { "volatilityPct": 42.5, "returnPct": 10 }
+      },
       "sector": "科技",
       "currency": "USD",
       "qty": {
@@ -449,6 +467,12 @@
       "symbol": "DEMO-D",
       "name": "虚构观察资产",
       "assetType": "股票",
+      "riskReturn": {
+        "YTD": { "volatilityPct": 17.2, "returnPct": 0 },
+        "1M": { "volatilityPct": 15.4, "returnPct": -0.5 },
+        "1Y": { "volatilityPct": 19.3, "returnPct": 1.2 },
+        "Max": { "volatilityPct": 20.1, "returnPct": 0 }
+      },
       "sector": "消费",
       "currency": "USD",
       "qty": {
@@ -842,9 +866,37 @@
       }
     ]
   },
+  "dailyReturns": [
+    { "date": "2026-09-28", "returnPct": 0.3, "pnlAmount": 1350.25 },
+    { "date": "2026-09-29", "returnPct": -0.2, "pnlAmount": -901.07 },
+    { "date": "2026-09-30", "returnPct": 0, "pnlAmount": 0 },
+    { "date": "2026-10-01", "returnPct": 0.4, "pnlAmount": 1800.5 },
+    { "date": "2026-10-02", "returnPct": -0.3, "pnlAmount": -1355.4 },
+    { "date": "2026-10-05", "returnPct": 0.1, "pnlAmount": 450.25 },
+    { "date": "2026-10-06", "returnPct": 0, "pnlAmount": 0 },
+    { "date": "2026-10-07", "returnPct": -0.2, "pnlAmount": -901.4 },
+    { "date": "2026-10-08", "returnPct": 0.6, "pnlAmount": 2700.8 },
+    { "date": "2026-10-09", "returnPct": 0.2, "pnlAmount": 905.5 },
+    { "date": "2026-10-12", "returnPct": -0.4, "pnlAmount": -1814.6 },
+    { "date": "2026-10-13", "returnPct": 0.3, "pnlAmount": 1355.5 },
+    { "date": "2026-10-14", "returnPct": 0.1, "pnlAmount": 453.2 },
+    { "date": "2026-10-15", "returnPct": -0.1, "pnlAmount": -453.65 },
+    { "date": "2026-10-16", "returnPct": 0.2, "pnlAmount": 906.4 },
+    { "date": "2026-10-19", "returnPct": 0.5, "pnlAmount": 2270.5 },
+    { "date": "2026-10-20", "returnPct": -0.3, "pnlAmount": -1369.2 },
+    { "date": "2026-10-21", "returnPct": 0, "pnlAmount": 0 },
+    { "date": "2026-10-22", "returnPct": null, "pnlAmount": null },
+    { "date": "2026-10-23", "returnPct": -0.2, "pnlAmount": -910.5 },
+    { "date": "2026-10-26", "returnPct": 0.4, "pnlAmount": 1817.3 },
+    { "date": "2026-10-27", "returnPct": -0.1, "pnlAmount": -456.15 },
+    { "date": "2026-10-28", "returnPct": 0.2, "pnlAmount": 911.4 },
+    { "date": "2026-10-29", "returnPct": -0.2, "pnlAmount": -913.2 },
+    { "date": "2026-10-30", "returnPct": 0.1, "pnlAmount": 455.7 }
+  ],
   "monthlyReturns": [
     {
       "year": 2025,
+      "pnlAmounts": [3500.25, 7070.5, -3605.95, 0, 10709.65, -7353.96, 3603.44, 7278.95, -3712.26, 3675.14, 7423.79, 3786.13],
       "months": [
         1,
         2,
@@ -862,6 +914,7 @@
     },
     {
       "year": 2026,
+      "pnlAmounts": [9800.5, 4998.25, -10096.47, 14841.81, 10191.38, -5197.61, 15436.9, 10599.99, 5406, 5460.06, null, null],
       "months": [
         2,
         1,

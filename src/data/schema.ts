@@ -26,13 +26,19 @@ const account = z.object({ name: text, idMasked: maskedId, nav: positiveMoney, d
 const assetClassification = {
   assetType: text.optional(), sector: text.optional(), currency: z.string().regex(/^[A-Z]{3}$/).optional(),
 };
-const holding = z.object({ symbol: text, qty: nonnegativeMetric, markPrice: positiveMoney, valueUsd: positiveMoney, note: text, ...assetClassification }).strict();
+const riskReturnMetric = z.object({ volatilityPct: z.number().finite().nonnegative().nullable(), returnPct: z.number().finite().nullable() }).strict();
+const riskReturn = z.object({ '1M': riskReturnMetric.optional(), YTD: riskReturnMetric.optional(), '1Y': riskReturnMetric.optional(), Max: riskReturnMetric.optional() }).strict();
+const holding = z.object({ symbol: text, qty: nonnegativeMetric, markPrice: positiveMoney, valueUsd: positiveMoney, note: text, ...assetClassification,
+  riskReturn: riskReturn.optional(),
+}).strict();
 const attribution = { accountId: maskedId.optional(), bucket: text.optional(), inFramework: z.boolean().optional() };
 const cashTier = z.object({ tier: text, location: text, amount: positiveMoney, ...attribution, currency: assetClassification.currency }).strict();
 const position = holding.extend({
   name: text.optional(), ...attribution,
   buyInAmount: z.number().nonnegative().optional(), buyInPerShare: z.number().nonnegative().optional(),
   pnlAmount: z.number().finite().nullable(), pnlPct: z.number().finite().nullable(),
+  totalReturn: z.number().finite().nullable().optional(),
+  totalReturnPct: z.number().finite().nullable().optional(),
   costCaliber: text, inFramework: z.boolean(),
 });
 const performance = z.object({
@@ -70,6 +76,10 @@ export const schemas = {
     // Presentation slots are optional. Retired alerts must migrate to watchlist. Plain amounts use currency;
     // percentages are percentage points. Their provenance is the module meta.
     positions: z.array(position).optional(), ammo: z.array(cashTier).optional(),
+    closedPositions: z.array(z.object({
+      symbol: text, name: text.optional(), pnlAmount: z.number().finite().nullable(), ...attribution,
+      pnlPct: z.number().finite().nullable().optional(), buyInAmount: z.number().finite().nonnegative().optional(),
+    }).strict()).optional(),
     series: z.array(z.object({ date, value: z.number().nonnegative(), changePct: z.number().finite().optional() }).strict()).optional(),
     seriesSummary: z.object({ changePct: z.number().finite() }).strict().optional(),
     returnComparison: z.array(z.object({
@@ -81,8 +91,11 @@ export const schemas = {
       benchmarkLabel: text,
       points: z.array(z.object({ date, portfolio: z.number().positive(), benchmark: z.number().positive() }).strict()),
     }).strict().optional(),
+    dailyReturns: z.array(z.object({ date, returnPct: z.number().finite().nullable(), pnlAmount: z.number().finite().nullable().optional() }).strict())
+      .refine(rows => new Set(rows.map(row => row.date)).size === rows.length, '每天最多一条收益记录').optional(),
     monthlyReturns: z.array(z.object({
       year: z.number().int().min(1900).max(9999), months: z.array(z.number().finite().nullable()).length(12),
+      pnlAmounts: z.array(z.number().finite().nullable()).length(12).optional(),
     }).strict()).optional(),
     performanceByYear: z.record(z.string().regex(/^\d{4}$/), performance).optional(),
     previousKpis: z.object({

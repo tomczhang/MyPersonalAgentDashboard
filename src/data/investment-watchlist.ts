@@ -27,11 +27,16 @@ export function watchlistSummary(item: WatchlistItem) {
   const progress = next && start && span !== 0
     ? Math.max(0, Math.min(1, (item.referencePrice - start.price) / span))
     : null;
+  const gapPct = next && item.referencePrice > 0 ? (next.price - item.referencePrice) / item.referencePrice * 100 : null;
   return {
     triggeredCount: triggered.length,
     total: item.levels.length,
     allTriggered: triggered.length === item.levels.length,
     next,
+    gapPct,
+    strikeLevel: start?.level ?? null,
+    inStrikeZone: triggered.length > 0,
+    nearStrikeZone: triggered.length === 0 && gapPct !== null && Math.abs(gapPct) <= 5,
     progress,
   };
 }

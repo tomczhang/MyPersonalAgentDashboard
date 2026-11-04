@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { RiCalendarLine } from '@remixicon/react';
 import { AreaChartCard, type AreaPoint } from '@/components/application/charts/area-chart-card';
 import { ChartHeader, describeDelta } from '@/components/application/charts/chart-card';
+import { CHIP_COLORS } from '@/components/base/badges/chip';
 import { Switch } from '@/components/base/switch/switch';
 import { Select, SelectItem } from '@/components/base/select/select';
 import { filterSeries, money, percent, type Investment, type Range } from '@/data/investment-view';
@@ -77,10 +78,11 @@ export function InvestmentBenchmarkCard({ data }: { data: Investment }) {
     const income = point ? (typeof point.income === 'number' ? point.income : undefined) : annual?.totalReturn;
     const rawPoint = point ? rawPoints.find(row => row.label === point.label) : undefined;
     const rate = point ? (typeof rawPoint?.portfolioPct === 'number' ? rawPoint.portfolioPct : undefined) : annual?.twrPct;
+    const delta = rate === undefined ? undefined : describeDelta(rate / 100);
     return <ChartHeader
       label={point ? `${point.label.slice(0, 7).replace('-', '年')}月收入` : `${year} 收入`}
       value={income} format={money} valueText={income === undefined ? '—' : undefined}
-      delta={rate === undefined ? undefined : describeDelta(rate / 100)}
+      delta={delta} deltaClassName={delta && CHIP_COLORS[delta.color]}
       fadeKey={point?.label ?? 'annual'}
       trailing={<Select aria-label="收益时间范围" size="sm" selectedKey={range} onSelectionChange={id => onRangeChange(id as Range)}
         className="shrink-0" triggerClassName="h-8" popoverClassName="w-48 transition-none"

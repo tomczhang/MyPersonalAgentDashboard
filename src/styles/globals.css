@@ -745,11 +745,9 @@ input[type="search"]::-webkit-search-cancel-button {
   background-color: var(--color-background-secondary-default);
   border-top: 1px solid var(--color-separator-border);
   border-bottom: 1px solid var(--color-separator-border);
-  transition: padding 200ms ease, font-size 200ms ease;
 }
 .bui-table td {
   @apply px-3 py-2.5 align-middle text-body-medium text-text-primary outline-none;
-  transition: padding 200ms ease, font-size 200ms ease;
 }
 /* Separators sit *between* rows only: the trailing row's boundary is drawn by
  * whatever follows the table (the container's bottom edge, or the pagination
@@ -766,6 +764,23 @@ input[type="search"]::-webkit-search-cancel-button {
 .bui-table.bui-table-sm th,
 .bui-table.bui-table-sm td {
   @apply px-2.5 py-1.5 text-body-2-medium;
+}
+
+/* Holdings follows the spacious, full-width BoardUI finance table layout. */
+.investment-holdings-table th {
+  @apply px-4 py-3 text-body-2-medium;
+}
+.investment-holdings-table td {
+  @apply h-18 px-4 py-4 text-body-2-medium;
+}
+.investment-holdings-table tr > :first-child {
+  @apply ps-5 sm:ps-6;
+}
+.investment-holdings-table tr > :last-child {
+  @apply pe-5 sm:pe-6;
+}
+.investment-holdings-table tbody tr:hover {
+  background-color: var(--color-background-primary-hover);
 }
 
 /* Agent Thinking (components/application/agent-thinking): the agent thinking state

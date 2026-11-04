@@ -1,11 +1,11 @@
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import { InvestmentMonthlyReturns, monthlyReturnsData } from '@/components/investment-monthly-returns';
+import { InvestmentMonthlyReturns, MonthlyReturnsMatrix, dailyReturnsData, monthlyReturnsData, formatReturnAmount } from '@/components/investment-monthly-returns';
 import type { Investment } from '@/data/investment-view';
 
 const row = (year: number, values: (number | null)[]) => ({ year, months: [...values, ...Array<null>(12 - values.length).fill(null)] });
-const render = (data?: Investment['monthlyReturns']) => renderToStaticMarkup(createElement(InvestmentMonthlyReturns, { data }));
+const render = (data: NonNullable<Investment['monthlyReturns']>) => renderToStaticMarkup(createElement(MonthlyReturnsMatrix, { data }));
 
 describe('monthly returns matrix', () => {
   it('uses one absolute maximum across years and the same four boundaries for both signs', () => {
@@ -40,10 +40,42 @@ describe('monthly returns matrix', () => {
   });
 
   it('hides missing and empty slots but retains supplied years with all nulls or zeros', () => {
-    expect(render()).toBe('');
-    expect(render([])).toBe('');
+    expect(renderToStaticMarkup(createElement(InvestmentMonthlyReturns))).toBe('');
+    expect(renderToStaticMarkup(createElement(InvestmentMonthlyReturns, { data: [], dailyData: [] }))).toBe('');
     expect(render([row(2026, [])])).toContain('月度收益');
     expect(monthlyReturnsData([row(2026, Array(12).fill(0))])[0].months.every(cell => cell.band === 0 && cell.label === '0.0%')).toBe(true);
     expect(render([row(2026, Array(12).fill(0))])).not.toMatch(/NaN|Infinity/);
+  });
+});
+
+describe('daily returns calendar', () => {
+  it('maps supplied amounts to their dates and months and formats signed currency without inferring missing amounts', () => {
+    expect(formatReturnAmount(1234.5, 'USD')).toBe('+USD 1,234.50');
+    expect(formatReturnAmount(-1234.5, 'USD')).toBe('−USD 1,234.50');
+    expect(formatReturnAmount(-0, 'USD')).toBe('+USD 0.00');
+    expect(formatReturnAmount(null, 'USD')).toBe('暂无盈亏金额');
+    expect(formatReturnAmount(undefined, 'USD')).toBe('暂无盈亏金额');
+    const days = dailyReturnsData([{ date: '2026-10-02', returnPct: -0.3, pnlAmount: -1355.4 }], '2026-10');
+    expect(days.find(cell => cell?.date === '2026-10-02')?.amount).toBe(-1355.4);
+    expect(days.find(cell => cell?.date === '2026-10-01')?.amount).toBeUndefined();
+    const mapped = monthlyReturnsData([{ ...row(2026, [1, 0, null]), pnlAmounts: [500, 0, ...Array<null>(10).fill(null)] }]);
+    expect(mapped[0].months.slice(0, 3).map(cell => cell.amount)).toEqual([500, 0, null]);
+  });
+  it('places leap days correctly and distinguishes zero, missing and signed returns', () => {
+    const data = [
+      { date: '2024-02-29', returnPct: -4 }, { date: '2024-02-01', returnPct: 1 },
+      { date: '2024-02-02', returnPct: 0 }, { date: '2024-02-03', returnPct: null },
+    ];
+    const cells = dailyReturnsData(data, '2024-02');
+    expect(cells).toHaveLength(35);
+    expect(cells.slice(0, 3)).toEqual([null, null, null]);
+    expect(cells.filter(Boolean)).toHaveLength(29);
+    expect(cells[3]).toMatchObject({ date: '2024-02-01', tone: 'positive', band: 1, label: '+1.0%' });
+    expect(cells[4]).toMatchObject({ tone: 'zero', label: '0.0%' });
+    expect(cells[5]).toMatchObject({ tone: 'missing', label: '' });
+    expect(cells[6]).toMatchObject({ tone: 'missing', label: '' });
+    expect(cells[31]).toMatchObject({ date: '2024-02-29', tone: 'negative', band: 4 });
+    expect(dailyReturnsData([], '2026-02').filter(Boolean)).toHaveLength(28);
+    expect(dailyReturnsData([], '2026-03')).toHaveLength(42);
   });
 });

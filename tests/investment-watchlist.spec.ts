@@ -32,7 +32,13 @@ for (const width of [1440, 390]) {
       expect(Math.abs(readoutBox!.y + readoutBox!.height / 2 - titleBox!.y - titleBox!.height / 2)).toBeLessThan(2);
     }
     await expect(panel(page)).toContainText('全部节点已触发');
-    await expect(panel(page)).toContainText('缺少区间');
+    await expect(panel(page)).toContainText('+6.67%');
+    await expect(panel(page)).toContainText('-10%');
+    await expect(panel(page).getByText('未进入击球区', { exact: true })).toHaveCount(1);
+    for (const level of [1, 2, 3]) await expect(panel(page).getByText(`已进入击球区 · 第 ${level} 阶段`, { exact: true })).toBeVisible();
+    const title = page.getByRole('heading', { name: '触发 / 观察名单', exact: true });
+    const benchmarkTitle = page.getByRole('heading', { name: '基准对比', exact: true });
+    expect(await title.evaluate(node => getComputedStyle(node).fontSize)).toBe(await benchmarkTitle.evaluate(node => getComputedStyle(node).fontSize));
     const boxes = await cards(page).evaluateAll(nodes => nodes.map(node => { const r = node.getBoundingClientRect(); return { x: r.x, y: r.y }; }));
     expect(boxes[0].y === boxes[1].y).toBe(width === 1440);
     // The full gradient always spans the track; only its clip changes with completion.
@@ -105,7 +111,8 @@ for (const width of [1440, 390]) {
         }, { index, triggered: node.status === 'triggered' });
         await expect(columns.first()).toHaveCSS('background-color', color);
       }
-      await expect(cards(page).first().locator('xpath=..')).toContainText('下一节点 US$160.00 · 参考价 US$150.00');
+      await expect(cards(page).first().locator('xpath=..')).toContainText('下一节点价格US$160.00');
+      await expect(cards(page).first().locator('xpath=..')).toContainText('当前价格US$150.00');
       await expect(ladder(page)).toHaveCSS('opacity', '1');
       await expect(ladder(page)).toHaveCSS('filter', 'none');
       await page.mouse.move(0, 0);

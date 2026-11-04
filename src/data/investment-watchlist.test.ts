@@ -5,6 +5,26 @@ import { watchlistGradientColor, watchlistLevelColor, watchlistSummary } from '@
 
 const items = parseModule('investment', example).watchlist!;
 describe('watchlist stages and interval progress', () => {
+  it('shows the price move required and includes both five-percent boundaries for every direction', () => {
+    expect(watchlistSummary(items[0]).gapPct).toBeCloseTo(6.666667);
+    expect(watchlistSummary(items[1])).toMatchObject({ gapPct: -10, inStrikeZone: true, strikeLevel: 1 });
+    for (const direction of ['买入', '卖出', '观察'] as const) {
+      for (const [price, inside] of [[94.99, false], [95, true], [100, true], [105, true], [105.01, false]] as const) {
+        const item = { ...items[0], direction, referencePrice: 100, levels: [{ level: 1, price, status: 'next' as const }] };
+        expect(watchlistSummary(item)).toMatchObject({ nearStrikeZone: inside, inStrikeZone: false, strikeLevel: null, triggeredCount: 0 });
+      }
+    }
+    expect(watchlistSummary(items[2]).inStrikeZone).toBe(false);
+    expect(watchlistSummary(items[3])).toMatchObject({ gapPct: null, inStrikeZone: true, strikeLevel: 3 });
+    expect(watchlistSummary({ ...items[1], referencePrice: 0 })).toMatchObject({ gapPct: null, inStrikeZone: true, strikeLevel: 1 });
+  });
+  it('keeps the latest supplied strike level after price moves away, including sparse level IDs', () => {
+    for (const referencePrice of [1, 150, 1000]) {
+      expect(watchlistSummary({ ...items[0], referencePrice })).toMatchObject({ inStrikeZone: true, strikeLevel: 2, nearStrikeZone: false });
+    }
+    const item = { ...items[0], levels: [{ level: 2, price: 100, status: 'triggered' as const }, { level: 5, price: 150, status: 'triggered' as const }] };
+    expect(watchlistSummary(item)).toMatchObject({ inStrikeZone: true, strikeLevel: 5, allTriggered: true });
+  });
   it('accepts optional whole planned shares, preserves zero, and rejects retired notes', () => {
     const withNode = (node: object) => parseModule('investment', { ...example, watchlist: [{ ...items[0], levels: [node] }] });
     const base = { level: 1, price: 140, status: 'triggered' };

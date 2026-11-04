@@ -8,8 +8,8 @@ import { confidenceLabels, formatMetric, kpis, moduleInfo, statusLabels } from '
 import type { LoadedModule } from '@/data/load';
 import { cx } from '@/utils/cx';
 
-export function Panel({ title, children, className }: { title: string; children: ReactNode; className?: string }) {
-  return <section className={cx('min-w-0 rounded-3xl border border-border-button-default bg-background-primary-default p-5 sm:p-6', className)}><h2 className="mb-4 text-headline-medium text-text-primary">{title}</h2>{children}</section>;
+export function Panel({ title, children, className, titleClassName }: { title: string; children: ReactNode; className?: string; titleClassName?: string }) {
+  return <section className={cx('min-w-0 rounded-3xl border border-border-button-default bg-background-primary-default p-5 sm:p-6', className)}><h2 className={cx('mb-4 text-headline-medium text-text-primary', titleClassName)}>{title}</h2>{children}</section>;
 }
 export function Status({ meta }: { meta: Meta }) {
   return <span className="inline-flex flex-wrap items-center gap-2"><Badge className={cx('rounded-full px-3 py-1', meta.status === 'confirmed' && 'bg-accent-100 text-accent-800')}>{statusLabels[meta.status]}</Badge>{isStale(meta) && <Badge className="rounded-full px-3 py-1">已过复核期</Badge>}</span>;
