@@ -3,8 +3,9 @@ import { useEffect, useState } from 'react';
 import { animate, useMotionValue, useMotionValueEvent, useReducedMotion, type MotionValue } from 'motion/react';
 import { Pie, PieChart, ResponsiveContainer, Sector } from 'recharts';
 import { ChartCenterReadout } from '@/components/application/charts/chart-card';
+import { Select, SelectItem } from '@/components/base/select/select';
 import { useCountUpPrecise } from '@/hooks/use-count-up';
-import { money, percent, share } from '@/data/investment-view';
+import { distributionDimensions, money, percent, share, type DistributionDimension } from '@/data/investment-view';
 
 const colors = ['var(--color-chart-1)', 'var(--color-chart-2)', 'var(--color-chart-3)', 'var(--color-chart-4)', 'var(--color-chart-5)'];
 type Slice = { name: string; value: number };
@@ -33,7 +34,7 @@ function DistributionSlice({ rows, total, selected, sweep, reducedMotion, onSele
     const visibleEnd = Math.max(endAngle, 90 - visibleSweep);
     const isSelected = selected === index;
     const angle = -(startAngle + endAngle) / 2 * Math.PI / 180;
-    const offset = isSelected ? 8 : 0;
+    const offset = isSelected && rows.length > 1 ? 8 : 0;
     if (!row || visibleEnd >= startAngle) return <g />;
     return <g data-distribution-slice role="button" tabIndex={0} aria-label={`${row.name} ${percent(share(row.value, total))}`} aria-pressed={isSelected}
       onPointerEnter={() => onSelect(index)} onPointerLeave={onClear}
@@ -54,7 +55,7 @@ function DistributionSlice({ rows, total, selected, sweep, reducedMotion, onSele
     </g>;
 }
 
-export function InvestmentDistribution({ rows, total }: { rows: Slice[]; total: number | null }) {
+function DistributionChart({ rows, total }: { rows: Slice[]; total: number | null }) {
   const [selected, setSelected] = useState<number | null>(null);
   const sweep = useMotionValue(0);
   const reducedMotion = useReducedMotion();
@@ -64,9 +65,7 @@ export function InvestmentDistribution({ rows, total }: { rows: Slice[]; total: 
     return () => animation.stop();
   }, [reducedMotion, sweep]);
   const active = selected === null ? undefined : rows[selected];
-  return <section aria-label="资产分布" className="flex min-w-0 flex-col gap-4 rounded-3xl bg-background-secondary-default p-5 sm:p-6">
-    <h2 className="text-body-medium text-text-secondary">资产分布</h2>
-    {rows.length > 0 && total !== null && total > 0 ? <>
+  return rows.length > 0 && total !== null && total > 0 ? <>
       <div className="flex flex-1 items-center justify-center">
       <div className="relative aspect-square w-full max-w-96" onPointerLeave={() => setSelected(null)}
         onPointerMove={event => { if (!(event.target as Element).closest('[data-distribution-slice]')) setSelected(null); }}
@@ -79,6 +78,24 @@ export function InvestmentDistribution({ rows, total }: { rows: Slice[]; total: 
         <DistributionReadout amount={active?.value ?? total} total={total} label={active?.name ?? '总资产'} />
       </div>
       </div>
-    </> : <p role="status" className="py-8 text-body-regular text-text-tertiary">暂无可展示的资产分布</p>}
+    </> : <p role="status" className="py-8 text-body-regular text-text-tertiary">暂无可展示的资产分布</p>;
+}
+
+export function InvestmentDistribution({ rows, total, dimension, onDimensionChange }: {
+  rows: Slice[]; total: number | null; dimension: DistributionDimension; onDimensionChange: (dimension: DistributionDimension) => void;
+}) {
+  return <section aria-label="资产分布" className="flex min-w-0 flex-col gap-4 rounded-3xl bg-background-secondary-default p-5 sm:p-6">
+    <div className="flex flex-wrap items-center justify-between gap-2">
+      <h2 className="text-body-medium text-text-secondary">资产分布</h2>
+      <Select aria-label="资产分布视角" size="sm" selectedKey={dimension}
+        className="shrink-0" triggerClassName="h-8" popoverClassName="w-48 transition-none"
+        onSelectionChange={key => {
+          const selected = distributionDimensions.find(item => item.id === key);
+          if (selected) onDimensionChange(selected.id);
+        }}>
+        {distributionDimensions.map(item => <SelectItem key={item.id} id={item.id}>{item.label}</SelectItem>)}
+      </Select>
+    </div>
+    <DistributionChart key={JSON.stringify([dimension, rows, total])} rows={rows} total={total} />
   </section>;
 }

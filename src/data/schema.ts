@@ -23,9 +23,12 @@ const metaSchema = z.object({
 });
 const base = { meta: metaSchema, owner: text };
 const account = z.object({ name: text, idMasked: maskedId, nav: positiveMoney, dataDate: date, confidence: confidenceSchema }).strict();
-const holding = z.object({ symbol: text, qty: nonnegativeMetric, markPrice: positiveMoney, valueUsd: positiveMoney, note: text }).strict();
+const assetClassification = {
+  assetType: text.optional(), sector: text.optional(), currency: z.string().regex(/^[A-Z]{3}$/).optional(),
+};
+const holding = z.object({ symbol: text, qty: nonnegativeMetric, markPrice: positiveMoney, valueUsd: positiveMoney, note: text, ...assetClassification }).strict();
 const attribution = { accountId: maskedId.optional(), bucket: text.optional(), inFramework: z.boolean().optional() };
-const cashTier = z.object({ tier: text, location: text, amount: positiveMoney, ...attribution }).strict();
+const cashTier = z.object({ tier: text, location: text, amount: positiveMoney, ...attribution, currency: assetClassification.currency }).strict();
 const position = holding.extend({
   name: text.optional(), ...attribution,
   buyInAmount: z.number().nonnegative().optional(), buyInPerShare: z.number().nonnegative().optional(),
@@ -82,6 +85,13 @@ export const schemas = {
       year: z.number().int().min(1900).max(9999), months: z.array(z.number().finite().nullable()).length(12),
     }).strict()).optional(),
     performanceByYear: z.record(z.string().regex(/^\d{4}$/), performance).optional(),
+    previousKpis: z.object({
+      asOf: date,
+      totalValue: z.number().nonnegative().optional(),
+      cashRatioPct: z.number().min(0).max(100).optional(),
+      concentrationPct: z.number().min(0).max(100).optional(),
+      totalReturnByYear: z.record(z.string().regex(/^\d{4}$/), z.number().finite()).optional(),
+    }).strict().optional(),
     dividends: z.object({ totalReceived: z.number().nonnegative(), yieldTtmPct: z.number().nonnegative(), byYear: z.array(z.object({ year: z.number().int().min(1900).max(9999), amount: z.number().nonnegative() }).strict()) }).strict().optional(),
     independentAccounts: z.array(account.extend({ includedInManagedAssets: z.literal(false), note: text })),
     framework: z.object({

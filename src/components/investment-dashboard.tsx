@@ -8,6 +8,8 @@ import { Select, SelectItem } from '@/components/base/select/select';
 import { Tabs, TabList, Tab, TabPanel } from '@/components/base/tabs/tabs';
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from '@/components/base/table/table';
 import { StatCards } from '@/components/application/dashboard/stat-cards';
+import { Chip } from '@/components/base/badges/chip';
+import { describeDelta } from '@/components/application/charts/chart-card';
 import { InvestmentDistribution } from '@/components/investment-distribution';
 import { InvestmentNavCard } from '@/components/investment-nav-card';
 import { InvestmentBenchmarkCard } from '@/components/investment-benchmark-card';
@@ -15,7 +17,7 @@ import { InvestmentMonthlyReturns } from '@/components/investment-monthly-return
 import { InvestmentAlerts } from '@/components/investment-alerts';
 import { Panel, Status } from '@/components/module-content';
 import { confidenceLabels } from '@/data/presentation';
-import { investmentView, money, percent, share, type Investment, type Range } from '@/data/investment-view';
+import { investmentView, investmentDistribution, investmentKpiChanges, money, percent, share, type DistributionDimension, type Investment, type Range } from '@/data/investment-view';
 import { cx } from '@/utils/cx';
 
 const colors = ['var(--color-chart-1)', 'var(--color-chart-2)', 'var(--color-chart-3)', 'var(--color-chart-4)', 'var(--color-chart-5)'];
@@ -51,6 +53,7 @@ function AllocationRing({ rows, label, percentage = false, className, interactiv
 export function InvestmentDashboard({ data }: { data: Investment; origin: 'example' | 'local' }) {
   const [account, setAccount] = useState('all');
   const [scope, setScope] = useState('all');
+  const [distributionDimension, setDistributionDimension] = useState<DistributionDimension>('holding');
   const [range, setRange] = useState<Range>('YTD');
   const years = Object.keys(data.performanceByYear ?? {}).sort((a, b) => Number(b) - Number(a));
   const [chosenYear, setChosenYear] = useState<string>();
@@ -60,15 +63,19 @@ export function InvestmentDashboard({ data }: { data: Investment; origin: 'examp
   const accountName = account === 'all' ? '聚合账户' : data.accounts.find(row => row.idMasked === account)?.name ?? '所选账户';
   const scopeLabel = `${accountName} · ${scope === 'all' ? '全部持仓' : '仅框架内'}`;
   const cashRatio = view.cash === null ? null : share(view.cash, view.total);
-  const cashDeviation = cashRatio === null ? null : cashRatio - data.framework.cashTargetRatio.value * 100;
   const holdingTotal = view.positions.reduce((sum, row) => sum + row.valueUsd.value, 0);
   const topThreeTotal = [...view.positions].sort((a, b) => b.valueUsd.value - a.valueUsd.value).slice(0, 3).reduce((sum, row) => sum + row.valueUsd.value, 0);
   const concentration = view.complete ? share(topThreeTotal, holdingTotal) : null;
   const filteredPerformance = view.filtered ? undefined : performance?.totalReturn;
   const cashGap = view.total === null || view.cash === null ? null : view.total * data.framework.cashTargetRatio.value - view.cash;
-  const distribution = view.complete && view.cash !== null && view.cash >= 0 && view.positions.every(row => row.valueUsd.value >= 0)
-    ? [...view.positions.map(row => ({ name: row.name ?? row.symbol, value: row.valueUsd.value })), { name: '现金', value: view.cash }].filter(row => row.value > 0)
-    : [];
+  const distribution = investmentDistribution(view, data.accounts, distributionDimension);
+  const changes = investmentKpiChanges(data, view.filtered, year, { total: view.total, cashRatio, concentration });
+  const delta = (change: number | null) => {
+    const display = change === null ? { label: '—', color: 'neutral' as const } : describeDelta(change);
+    return <Chip variant="bold" color={display.color} className="tabular-nums"
+      aria-label={change === null ? '暂无可比变化比例' : `较上期快照（${changes.asOf}）变化 ${display.label}`}>{display.label}</Chip>;
+  };
+  const kpiMoney = (value: number | null | undefined) => value == null ? '—' : new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(value);
 
   return <>
     <div className="flex flex-col gap-4">
@@ -90,21 +97,23 @@ export function InvestmentDashboard({ data }: { data: Investment; origin: 'examp
       <div className="flex min-w-0 flex-col [&>section]:flex-1">
         <InvestmentNavCard data={data} range={range} onRangeChange={setRange} />
       </div>
-      <InvestmentDistribution key={JSON.stringify(distribution)} rows={distribution} total={view.total} />
+      <InvestmentDistribution rows={distribution} total={view.total} dimension={distributionDimension} onDimensionChange={setDistributionDimension} />
     </div>
         <div className="flex flex-col gap-3">
           <p aria-live="polite" className="sr-only">当前视图：{scopeLabel}</p>
           {!view.complete && <p role="status" className="text-body-2-medium text-text-error-primary">槽位缺少账户或框架归属；仅列出已匹配条目，汇总与权重暂不显示。</p>}
-          <StatCards borderless className="xl:grid-cols-4" stats={[
-            { label: '组合总值', value: money(view.total), icon: RiBankLine },
-            { label: '现金占比', value: percent(cashRatio), icon: RiCoinsLine, caption: <div className="flex flex-col gap-1"><span>目标 {percent(data.framework.cashTargetRatio.value * 100)} · 现金 {money(view.cash)}</span><span className={cx(cashDeviation === null || Math.abs(cashDeviation) < 0.005 ? 'text-text-primary/75' : 'text-text-error-primary')}>偏差 {cashDeviation == null ? '—' : `${cashDeviation > 0 ? '+' : ''}${percent(cashDeviation).replace('%', '')} 个百分点`}</span></div> },
-            { label: `${year ?? '年度'} 收益`, value: <span className={tone(filteredPerformance)}>{signed(filteredPerformance)}</span>, icon: RiFundsLine, caption: <div className="flex flex-col gap-2">{years.length > 0 && <Select aria-label="KPI 收益年份" selectedKey={year} onSelectionChange={key => setChosenYear(String(key))}>{years.map(y => <SelectItem key={y} id={y}>{y} 年</SelectItem>)}</Select>}{view.filtered && <span>当前筛选暂无年度收益</span>}</div> },
-            { label: '集中度', value: percent(concentration), icon: RiPieChartLine },
+          <p className="text-caption-1-medium text-text-tertiary">{changes.asOf ? <>变化比例 · 较上期快照 <time dateTime={changes.asOf}>{changes.asOf}</time></> : '变化比例 · 暂无可比历史快照'}</p>
+          <StatCards borderless variant="summary" className="xl:grid-cols-4" stats={[
+            { label: '组合总值', value: kpiMoney(view.total), delta: delta(changes.total), icon: RiBankLine },
+            { label: '现金占比', value: percent(cashRatio), delta: delta(changes.cash), icon: RiCoinsLine },
+            { label: `${year ?? '年度'} 收益`, value: `${filteredPerformance != null && filteredPerformance > 0 ? '+' : ''}${kpiMoney(filteredPerformance)}`, delta: delta(changes.income), icon: RiFundsLine,
+              trailing: years.length > 0 && <Select aria-label="KPI 收益年份" size="sm" selectedKey={year} onSelectionChange={key => setChosenYear(String(key))} className="shrink-0" triggerClassName="h-8" popoverClassName="w-48 transition-none">{years.map(y => <SelectItem key={y} id={y}>{y} 年</SelectItem>)}</Select> },
+            { label: '集中度', value: percent(concentration), delta: delta(changes.concentration), icon: RiPieChartLine },
           ]} />
         </div>
     <div className="grid min-w-0 items-start gap-5 xl:grid-cols-12">
       <div className="flex min-w-0 flex-col gap-5 xl:col-span-8">
-        <InvestmentBenchmarkCard data={data.benchmarkSeries} />
+        <InvestmentBenchmarkCard data={data} />
         <InvestmentAlerts watchlist={data.watchlist} asOf={data.meta.asOf} />
         <Panel title="持仓明细" className="border-0 bg-background-secondary-default">
           <p className="mb-4 text-caption-1-medium text-text-tertiary">{view.positions.length} 项 · USD</p>

@@ -1,10 +1,35 @@
 import { describe, expect, it } from 'vitest';
 import example from '../../data/examples/investment.json';
 import { parseModule } from './schema';
-import { filterSeries, investmentView, share } from './investment-view';
+import { filterSeries, investmentView, investmentKpiChanges, relativeChange, share } from './investment-view';
 
 const data = () => parseModule('investment', structuredClone(example));
 describe('investment snapshot views', () => {
+  it('compares KPI values against a strictly earlier snapshot with the same year and scope', () => {
+    const slot = data();
+    const current = { total: 500000, cashRatio: 20, concentration: 87.5 };
+    const change = investmentKpiChanges(slot, false, '2026', current);
+    expect(change.total).toBeCloseTo(20000 / 480000);
+    expect(change.cash).toBeCloseTo(-2 / 22);
+    expect(change.concentration).toBeCloseTo(2.5 / 85);
+    expect(change.income).toBeCloseTo(5000 / 35000);
+    expect(investmentKpiChanges(slot, false, '2025', current).income).toBe(0);
+    expect(investmentKpiChanges(slot, false, '2024', current).income).toBeNull();
+    expect(investmentKpiChanges(slot, true, '2026', current).total).toBeNull();
+    slot.previousKpis!.asOf = slot.meta.asOf;
+    expect(investmentKpiChanges(slot, false, '2026', current).cash).toBeNull();
+    delete slot.previousKpis;
+    expect(investmentKpiChanges(slot, false, '2026', current).income).toBeNull();
+  });
+  it('distinguishes zero changes, missing baselines and improvement from negative earnings', () => {
+    expect(relativeChange(0, 100)).toBe(-1);
+    expect(relativeChange(100, 100)).toBe(0);
+    expect(relativeChange(-50, -100)).toBe(0.5);
+    expect(relativeChange(100, 0)).toBeNull();
+    expect(relativeChange(0, 0)).toBeNull();
+    expect(relativeChange(null, 100)).toBeNull();
+    expect(relativeChange(100, undefined)).toBeNull();
+  });
   it('reconciles the full snapshot and both account NAVs without recalculating P/L', () => {
     const slot = data();
     const full = investmentView(slot, 'all', false);

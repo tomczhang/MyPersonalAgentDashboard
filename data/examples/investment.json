@@ -29,6 +29,7 @@
   "cashTiers": [
     {
       "tier": "即时可用",
+      "currency": "USD",
       "location": "虚构现金账户 U***0001",
       "amount": {
         "value": 40000,
@@ -42,6 +43,7 @@
     },
     {
       "tier": "短期储备",
+      "currency": "USD",
       "location": "虚构储备账户 U***0002",
       "amount": {
         "value": 40000,
@@ -55,6 +57,7 @@
     },
     {
       "tier": "策略备用",
+      "currency": "USD",
       "location": "虚构证券主账户 U***0001 · 策略备用",
       "amount": {
         "value": 20000,
@@ -102,6 +105,9 @@
   "holdings": [
     {
       "symbol": "DEMO-A",
+      "assetType": "债券基金",
+      "sector": "债券",
+      "currency": "USD",
       "qty": {
         "value": 1000,
         "unit": "股",
@@ -124,6 +130,9 @@
     },
     {
       "symbol": "DEMO-B",
+      "assetType": "股票",
+      "sector": "科技",
+      "currency": "USD",
       "qty": {
         "value": 1000,
         "unit": "股",
@@ -146,6 +155,9 @@
     },
     {
       "symbol": "DEMO-C",
+      "assetType": "股票",
+      "sector": "科技",
+      "currency": "USD",
       "qty": {
         "value": 1000,
         "unit": "股",
@@ -168,6 +180,9 @@
     },
     {
       "symbol": "DEMO-D",
+      "assetType": "股票",
+      "sector": "消费",
+      "currency": "USD",
       "qty": {
         "value": 1000,
         "unit": "股",
@@ -331,6 +346,9 @@
     {
       "symbol": "DEMO-A",
       "name": "虚构稳健资产",
+      "assetType": "债券基金",
+      "sector": "债券",
+      "currency": "USD",
       "qty": {
         "value": 1000,
         "unit": "股",
@@ -362,6 +380,9 @@
     {
       "symbol": "DEMO-B",
       "name": "虚构成长资产",
+      "assetType": "股票",
+      "sector": "科技",
+      "currency": "USD",
       "qty": {
         "value": 1000,
         "unit": "股",
@@ -393,6 +414,9 @@
     {
       "symbol": "DEMO-C",
       "name": "虚构创新资产",
+      "assetType": "股票",
+      "sector": "科技",
+      "currency": "USD",
       "qty": {
         "value": 1000,
         "unit": "股",
@@ -424,6 +448,9 @@
     {
       "symbol": "DEMO-D",
       "name": "虚构观察资产",
+      "assetType": "股票",
+      "sector": "消费",
+      "currency": "USD",
       "qty": {
         "value": 1000,
         "unit": "股",
@@ -455,6 +482,7 @@
   "ammo": [
     {
       "tier": "即时可用",
+      "currency": "USD",
       "location": "虚构现金账户 U***0001",
       "amount": {
         "value": 40000,
@@ -468,6 +496,7 @@
     },
     {
       "tier": "短期储备",
+      "currency": "USD",
       "location": "虚构储备账户 U***0002",
       "amount": {
         "value": 40000,
@@ -481,6 +510,7 @@
     },
     {
       "tier": "策略备用",
+      "currency": "USD",
       "location": "虚构证券主账户 U***0001 · 策略备用",
       "amount": {
         "value": 20000,
@@ -576,6 +606,13 @@
   ],
   "seriesSummary": {
     "changePct": 15.4
+  },
+  "previousKpis": {
+    "asOf": "2026-10-01",
+    "totalValue": 480000,
+    "cashRatioPct": 22,
+    "concentrationPct": 85,
+    "totalReturnByYear": { "2025": 40000, "2026": 35000 }
   },
   "performanceByYear": {
     "2025": {

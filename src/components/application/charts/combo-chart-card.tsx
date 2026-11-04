@@ -96,6 +96,9 @@ export interface ComboChartCardProps {
    */
   caption?: (row?: ComboPoint) => string;
   headerTrailing?: ReactNode;
+  renderHeader?: (row?: ComboPoint) => ReactNode;
+  renderFooter?: (row?: ComboPoint) => ReactNode;
+  labelFormat?: (label: string) => string;
   className?: string;
 }
 
@@ -188,6 +191,9 @@ export function ComboChartCard({
   headlineFrom = "bar",
   caption,
   headerTrailing,
+  renderHeader,
+  renderFooter,
+  labelFormat,
   className,
 }: ComboChartCardProps = {}) {
   const localize = useTemplateCopy();
@@ -239,7 +245,7 @@ export function ComboChartCard({
 
   return localize((
     <ChartCard className={cx(tiles && "h-auto", className)}>
-      <ChartHeader
+      {renderHeader ? renderHeader(hovering ? data[activeIndex] : undefined) : <ChartHeader
         label={
           caption
             ? `${headerLabel} · ${caption(hovering ? data[activeIndex] : undefined)}`
@@ -255,7 +261,7 @@ export function ComboChartCard({
         rangeId={selectedId}
         onRangeChange={selectRange}
         trailing={headerTrailing}
-      />
+      />}
 
       <div className={cx("min-h-0 w-full flex-1", tiles && "h-[196px] flex-none")}>
         <ResponsiveContainer width="100%" height="100%">
@@ -292,6 +298,7 @@ export function ComboChartCard({
             />
             <XAxis
               dataKey="label"
+              tickFormatter={labelFormat}
               tickLine={false}
               axisLine={false}
               tickMargin={12}
@@ -362,6 +369,7 @@ export function ComboChartCard({
         </ResponsiveContainer>
       </div>
 
+      {renderFooter?.(hovering ? data[activeIndex] : undefined)}
       {tiles && (
         <ChartStatTiles
           items={[

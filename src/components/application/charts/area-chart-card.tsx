@@ -4,7 +4,7 @@ import { useTemplateCopy } from "@/components/foundations/template-copy/template
 
 import { useEffect, useId, useState, type ReactNode } from "react";
 import { useReducedMotion } from 'motion/react';
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, CartesianGrid, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import {
   ChartCard,
   ChartHeader,
@@ -77,6 +77,9 @@ export interface AreaChartCardProps {
   onRangeChange?: (id: string) => void;
   format?: (n: number) => string;
   axisFormat?: (n: number) => string;
+  axisDomain?: [number | 'auto', number | 'auto'];
+  fillOpacity?: number;
+  referenceValue?: number;
   labelFormat?: (label: string) => string;
   renderHeader?: (point?: AreaPoint) => ReactNode;
   legendSummary?: 'total' | 'latest';
@@ -150,6 +153,9 @@ export function AreaChartCard({
   onRangeChange,
   format = formatNumber,
   axisFormat,
+  axisDomain,
+  fillOpacity = 1,
+  referenceValue,
   labelFormat,
   renderHeader,
   legendSummary = 'total',
@@ -249,7 +255,7 @@ export function AreaChartCard({
               // `stackOffset="expand"` yields a 0-1 domain that Recharts then
               // pads, which would put a 105% tick on a 100% chart - so the
               // percent variant pins the domain and its ticks.
-              domain={isPercent ? [0, 1] : undefined}
+              domain={isPercent ? [0, 1] : axisDomain}
               ticks={isPercent ? [0, 0.25, 0.5, 0.75, 1] : undefined}
               tickCount={4}
               tickFormatter={axisFormat ?? (isPercent ? (v: number) => `${Math.round(v * 100)}%` : compactNumber)}
@@ -266,6 +272,8 @@ export function AreaChartCard({
               interval="preserveStartEnd"
               tick={{ fontSize: 13, fill: "var(--color-text-tertiary)" }}
             />
+            {referenceValue !== undefined && <ReferenceLine y={referenceValue}
+              stroke="var(--color-text-tertiary)" strokeDasharray="4 4" />}
             {/* Headless: the cursor line is the only thing drawn, the header
                 and legend carry the values. */}
             <Tooltip
@@ -282,6 +290,7 @@ export function AreaChartCard({
                 stroke={tones[i].activeColor}
                 strokeWidth={2}
                 fill={`url(#${gradientId}-${i})`}
+                fillOpacity={fillOpacity}
                 isAnimationActive={!reducedMotion}
                 animationDuration={450}
                 dot={data.length === 1 ? { r: 3, fill: tones[i].activeColor } : false}
